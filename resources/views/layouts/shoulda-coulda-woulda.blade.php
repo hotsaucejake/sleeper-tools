@@ -86,7 +86,7 @@
     </div>
 
 
-
+@yield('footer-scripts')
 </body>
 
 </html>
