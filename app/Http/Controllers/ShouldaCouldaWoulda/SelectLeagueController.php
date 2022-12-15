@@ -15,6 +15,6 @@ class SelectLeagueController extends Controller
      */
     public function __invoke(Request $request)
     {
-        dd('here');
+        return view('shoulda-coulda-woulda.league-select');
     }
 }
