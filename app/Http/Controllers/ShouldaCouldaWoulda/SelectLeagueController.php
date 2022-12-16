@@ -102,11 +102,30 @@ class SelectLeagueController extends Controller
                 }
             }
 
+            $overall_wins = [];
+            $overall_losses = [];
+
+            foreach($managers as $manager) {
+                foreach($manager['records'] as $roster => $record) {
+                    $overall_wins[$roster] = 0;
+                    $overall_losses[$roster] = 0;
+                }
+            }
+
+            foreach($managers as $manager) {
+                foreach($manager['records'] as $roster => $record) {
+                    $overall_wins[$roster] += $record['win'];
+                    $overall_losses[$roster] += $record['loss'];
+                }
+            }
+
+            arsort($overall_losses);
+
             $valid_league = true;
         }
 
 
 
-        return view('shoulda-coulda-woulda.league-select', compact('valid_league', 'managers'));
+        return view('shoulda-coulda-woulda.league-select', compact('valid_league', 'managers', 'overall_losses', 'league'));
     }
 }

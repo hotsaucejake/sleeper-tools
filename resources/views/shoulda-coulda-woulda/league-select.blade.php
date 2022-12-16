@@ -2,6 +2,30 @@
 
 @section('content')
     @if ($valid_league)
+        <div class="row mb-3">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-center">Strength of Schedule</h5>
+                        <p class="card-text text-center">Ranked Toughest to Easiest</p>
+                    </div>
+                    <div class="card-body">
+                        @foreach ($overall_losses as $roster => $loss)
+                            <div class="progress mb-1" style="height: 36px">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar"
+                                    aria-valuenow="{{ $loss }}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"
+                                    style="width: {{ number_format(($loss / ($league->settings->playoff_week_start - 1) * count($managers)), 1) }}%">
+                                        <span class="fw-bold fs-6">{{ $managers[$roster]['name'] }}</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+            </div>
+        </div>
         <div class="row">
             @foreach ($managers as $manager)
                 <div class="col-md-4">
@@ -15,7 +39,8 @@
                         <ul class="list-group list-group-flush">
                             @foreach ($manager['records'] as $record)
                                 @if ($record['roster_id'] !== $manager['roster_id'])
-                                    <li class="list-group-item"><strong>{{ $record['name'] }}:</strong> {{ $record['win'] }} - {{ $record['loss'] }}</li>
+                                    <li class="list-group-item"><strong>{{ $record['name'] }}:</strong> {{ $record['win'] }}
+                                        - {{ $record['loss'] }}</li>
                                 @endif
                             @endforeach
                         </ul>
