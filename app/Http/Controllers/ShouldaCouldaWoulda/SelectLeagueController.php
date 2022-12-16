@@ -20,6 +20,9 @@ class SelectLeagueController extends Controller
         $valid_league = false;
         $managers = [];
         $schedule = [];
+        $overall_wins = [];
+        $overall_losses = [];
+        $league = null;
 
         if($request->has('league'))
         {
@@ -101,9 +104,6 @@ class SelectLeagueController extends Controller
                     }
                 }
             }
-
-            $overall_wins = [];
-            $overall_losses = [];
 
             foreach($managers as $manager) {
                 foreach($manager['records'] as $roster => $record) {
