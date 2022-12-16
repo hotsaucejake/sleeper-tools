@@ -43,13 +43,16 @@ class SelectLeagueController extends Controller
             } catch (\Throwable $th) {
                 return redirect()->route('shoulda-coulda-woulda.select-league')->with('error', 'This is not a valid Sleeper league ID!');
             }
+
+            foreach($rosters as $roster) {
+                $managers[$roster->owner_id] = ['user_id' => $roster->owner_id];
+            }
+
             foreach($users as $user) {
-                $managers[$user->user_id] = [
-                    'user_id' => $user->user_id,
-                    'name' => $user->display_name,
-                    'avatar' => $user->metadata?->avatar ?? ($user->avatar ? LaravelSleeper::showAvatar($user->avatar) : null),
-                    // 'avatar' => $user->avatar ? LaravelSleeper::showAvatar($user->avatar) : $user->metadata?->avatar ?? null,
-                ];
+                if(isset($managers[$user->user_id])) {
+                    $managers[$user->user_id] = Arr::add($managers[$user->user_id], 'name', $user->display_name);
+                    $managers[$user->user_id] = Arr::add($managers[$user->user_id], 'avatar', $user->metadata?->avatar ?? ($user->avatar ? LaravelSleeper::showAvatar($user->avatar) : null));
+                }
             }
 
             foreach($rosters as $roster) {
