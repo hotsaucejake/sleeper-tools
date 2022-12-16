@@ -45,20 +45,21 @@ class SelectLeagueController extends Controller
             }
 
             foreach($rosters as $roster) {
-                $managers[$roster->owner_id] = ['user_id' => $roster->owner_id];
+                $managers[$roster->roster_id] = [
+                    'roster_id' => $roster->roster_id,
+                    'user_id' => $roster->owner_id,
+                    'win' => $roster->settings->wins,
+                    'loss' => $roster->settings->losses,
+                ];
             }
 
             foreach($users as $user) {
-                if(isset($managers[$user->user_id])) {
-                    $managers[$user->user_id] = Arr::add($managers[$user->user_id], 'name', $user->display_name);
-                    $managers[$user->user_id] = Arr::add($managers[$user->user_id], 'avatar', $user->metadata?->avatar ?? ($user->avatar ? LaravelSleeper::showAvatar($user->avatar) : null));
+                foreach($managers as $manager) {
+                    if($manager['user_id'] === $user->user_id) {
+                        $managers[$manager['roster_id']] = Arr::add($managers[$manager['roster_id']], 'name', $user->display_name);
+                        $managers[$manager['roster_id']]  = Arr::add($managers[$manager['roster_id']], 'avatar', $user->metadata?->avatar ?? ($user->avatar ? LaravelSleeper::showAvatar($user->avatar) : null));
+                    }
                 }
-            }
-
-            foreach($rosters as $roster) {
-                $managers[$roster->owner_id] = Arr::add($managers[$roster->owner_id], 'roster_id', $roster->roster_id);
-                $managers[$roster->owner_id] = Arr::add($managers[$roster->owner_id], 'win', $roster->settings->wins);
-                $managers[$roster->owner_id] = Arr::add($managers[$roster->owner_id], 'loss', $roster->settings->losses);
             }
 
             foreach($matchups as $w => $week) {
@@ -66,34 +67,35 @@ class SelectLeagueController extends Controller
                     $filtered = Arr::where($week, function ($value, $key) use ($matchup) {
                         return $value->matchup_id === $matchup->matchup_id && $value->roster_id !== $matchup->roster_id;
                     });
-                    $schedule[$w][$matchup->roster_id] = ['score' => $matchup->points, 'vs' => current($filtered)->roster_id];
+                    $schedule[$w][$matchup->roster_id] = ['score' => $matchup->points, 'vs' => current($filtered)->roster_id, 'roster_id' => $matchup->roster_id];
                 }
             }
 
             foreach($managers as $manager) {
                 foreach($schedule as $week => $s) {
-                    $managers[$manager['user_id']]['schedule'][$week] = array_merge($s[$manager['roster_id']], ['user_id' => $manager['user_id']]);
+                    // $managers[$manager['roster_id']]['schedule'][$week] = array_merge($s[$manager['roster_id']], ['user_id' => $manager['user_id']]);
+                    $managers[$manager['roster_id']]['schedule'][$week] = $s[$manager['roster_id']];
                 }
 
                 foreach($managers as $m) {
-                    $managers[$manager['user_id']]['records'][$m['roster_id']] = ['name' => $m['name'], 'user_id' => $m['user_id'], 'win' => 0, 'loss' => 0];
+                    $managers[$manager['roster_id']]['records'][$m['roster_id']] = ['name' => $m['name'], 'roster_id' => $m['roster_id'], 'win' => 0, 'loss' => 0];
                 }
             }
 
             foreach($managers as $manager) {
                 foreach($manager['records'] as $roster => $record) { // compare each schedule here
-                    foreach($managers[$record['user_id']]['schedule'] as $week => $results) { // this is the schedule of the one we're comparing to
+                    foreach($managers[$roster]['schedule'] as $week => $results) { // this is the schedule of the one we're comparing to
                         if($results['vs'] === $manager['roster_id']) { // we're playing ourselves, let's compare the score of the one's whose list this is
-                            if($manager['schedule'][$week]['score'] > $managers[$results['user_id']]['schedule'][$week]['score']) {
-                                $managers[$manager['user_id']]['records'][$roster]['win']++;
+                            if($manager['schedule'][$week]['score'] > $managers[$results['roster_id']]['schedule'][$week]['score']) {
+                                $managers[$manager['roster_id']]['records'][$roster]['win']++;
                             } else {
-                                $managers[$manager['user_id']]['records'][$roster]['loss']++;
+                                $managers[$manager['roster_id']]['records'][$roster]['loss']++;
                             }
                         } else { // let's compare our score to $results['score']
-                            if($manager['schedule'][$week]['score'] > $results['score']) {
-                                $managers[$manager['user_id']]['records'][$roster]['win']++;
+                            if($manager['schedule'][$week]['score'] > $managers[$results['vs']]['schedule'][$week]['score']) {
+                                $managers[$manager['roster_id']]['records'][$roster]['win']++;
                             } else {
-                                $managers[$manager['user_id']]['records'][$roster]['loss']++;
+                                $managers[$manager['roster_id']]['records'][$roster]['loss']++;
                             }
                         }
                     }

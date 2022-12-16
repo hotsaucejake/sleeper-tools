@@ -14,7 +14,7 @@
                         </div>
                         <ul class="list-group list-group-flush">
                             @foreach ($manager['records'] as $record)
-                                @if ($record['user_id'] !== $manager['user_id'])
+                                @if ($record['roster_id'] !== $manager['roster_id'])
                                     <li class="list-group-item"><strong>{{ $record['name'] }}:</strong> {{ $record['win'] }} - {{ $record['loss'] }}</li>
                                 @endif
                             @endforeach
