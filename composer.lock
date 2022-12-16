@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3ba018504126670e19bad74bfd50b7dc",
+    "content-hash": "728f9968ec2ad5f3aa955f6fbd6f80ae",
     "packages": [
         {
             "name": "brick/math",
@@ -896,6 +896,76 @@
                 }
             ],
             "time": "2022-10-26T14:07:24+00:00"
+        },
+        {
+            "name": "hotsaucejake/laravel-sleeper",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hotsaucejake/laravel-sleeper.git",
+                "reference": "b3e8dc4a7e7a3ce6eabdd530e6389a0fc95e19ed"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hotsaucejake/laravel-sleeper/zipball/b3e8dc4a7e7a3ce6eabdd530e6389a0fc95e19ed",
+                "reference": "b3e8dc4a7e7a3ce6eabdd530e6389a0fc95e19ed",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.5",
+                "illuminate/contracts": "^9.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "nunomaduro/collision": "^6.0",
+                "orchestra/testbench": "^7.0",
+                "pestphp/pest": "^1.21",
+                "pestphp/pest-plugin-laravel": "^1.1",
+                "phpunit/phpunit": "^9.5",
+                "vlucas/phpdotenv": "^5.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "HOTSAUCEJAKE\\LaravelSleeper\\LaravelSleeperServiceProvider"
+                    ],
+                    "aliases": {
+                        "LaravelSleeper": "HOTSAUCEJAKE\\LaravelSleeper\\Facades\\LaravelSleeper"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "HOTSAUCEJAKE\\LaravelSleeper\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "hotsaucejake",
+                    "email": "get@hotsaucejake.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "An API wrapper for the fantasy sleeper app",
+            "homepage": "https://github.com/hotsaucejake/laravel-sleeper",
+            "keywords": [
+                "hotsaucejake",
+                "laravel",
+                "laravel sleeper",
+                "laravel-sleeper",
+                "sleeper api"
+            ],
+            "support": {
+                "issues": "https://github.com/hotsaucejake/laravel-sleeper/issues",
+                "source": "https://github.com/hotsaucejake/laravel-sleeper/tree/v1.0.0"
+            },
+            "time": "2022-12-15T17:54:52+00:00"
         },
         {
             "name": "laravel/framework",

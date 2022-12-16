@@ -64,6 +64,14 @@
         </header>
 
         <main>
+            @if(session('error'))
+                <div class="container-fluid my-4">
+                    <div class="alert alert-danger text-center">
+                        <p class="lead mb-0">{{ session('error') }}</p>
+                    </div>
+                </div>
+            @endif
+
             @yield('content')
         </main>
 
