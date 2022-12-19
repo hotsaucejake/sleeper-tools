@@ -122,6 +122,7 @@ class SelectLeagueController extends Controller
             arsort($overall_losses);
 
             $valid_league = true;
+            // dd($managers, $league);
         }
 
 

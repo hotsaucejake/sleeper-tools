@@ -39,8 +39,13 @@
                         <ul class="list-group list-group-flush">
                             @foreach ($manager['records'] as $record)
                                 @if ($record['roster_id'] !== $manager['roster_id'])
-                                    <li class="list-group-item"><strong>{{ $record['name'] }}:</strong> {{ $record['win'] }}
-                                        - {{ $record['loss'] }}</li>
+                                    @if ($league->settings->league_average_match)
+                                        <li class="list-group-item"><strong>{{ $record['name'] }}:</strong> {{ $record['win'] + ($managers[$manager['roster_id']]['win'] - $managers[$manager['roster_id']]['records'][$manager['roster_id']]['win']) }}
+                                            - {{ $record['loss'] + ($managers[$manager['roster_id']]['loss'] - $managers[$manager['roster_id']]['records'][$manager['roster_id']]['loss']) }}</li>
+                                    @else
+                                        <li class="list-group-item"><strong>{{ $record['name'] }}:</strong> {{ $record['win'] }}
+                                            - {{ $record['loss'] }}</li>
+                                    @endif
                                 @endif
                             @endforeach
                         </ul>
