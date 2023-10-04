@@ -30,10 +30,12 @@ class SelectLeagueController extends Controller
                 $league = LaravelSleeper::getLeague($request->league);
                 $users = LaravelSleeper::getLeagueUsers($request->league);
                 $rosters = LaravelSleeper::getLeagueRosters($request->league);
+                $state = LaravelSleeper::getSportState();
                 if((bool) $league->settings->playoff_week_start && (bool) $users[0] && (bool) $rosters[0])
                 {
                     try {
-                        for ($i=1; $i < $league->settings->playoff_week_start; $i++) {
+                        $weeks = $state->week <= $league->settings->playoff_week_start ? $state->week : $league->settings->playoff_week_start;
+                        for ($i=1; $i < $weeks; $i++) {
                             $matchups[$i] = LaravelSleeper::getLeagueMatchups($request->league, $i);
                         }
                     } catch (\Throwable $th) {
@@ -122,11 +124,9 @@ class SelectLeagueController extends Controller
             arsort($overall_losses);
 
             $valid_league = true;
-            // dd($managers, $league);
         }
 
 
-
-        return view('shoulda-coulda-woulda.league-select', compact('valid_league', 'managers', 'overall_losses', 'league'));
+        return view('shoulda-coulda-woulda.league-select', compact('valid_league', 'managers', 'overall_losses', 'league', 'weeks'));
     }
 }

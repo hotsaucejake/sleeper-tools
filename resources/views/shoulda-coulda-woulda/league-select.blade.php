@@ -16,7 +16,7 @@
                                     aria-valuenow="{{ $loss }}"
                                     aria-valuemin="0"
                                     aria-valuemax="100"
-                                    style="width: {{ number_format(($loss / ($league->settings->playoff_week_start - 1) * count($managers)), 1) }}%">
+                                    style="width: {{ number_format(($loss / (max($overall_losses)) * 100), 1) }}%">
                                         <span class="fw-bold fs-6">{{ $managers[$roster]['name'] }}</span>
                                 </div>
                             </div>
