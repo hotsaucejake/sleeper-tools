@@ -23,6 +23,7 @@ class SelectLeagueController extends Controller
         $overall_wins = [];
         $overall_losses = [];
         $league = null;
+        $current_week = null;
 
         if($request->has('league'))
         {
@@ -31,11 +32,11 @@ class SelectLeagueController extends Controller
                 $users = LaravelSleeper::getLeagueUsers($request->league);
                 $rosters = LaravelSleeper::getLeagueRosters($request->league);
                 $state = LaravelSleeper::getSportState();
-                if((bool) $league->settings->playoff_week_start && (bool) $users[0] && (bool) $rosters[0])
+                $current_week = min($state->week, $league->settings->playoff_week_start);
+                if((bool) $current_week && (bool) $users[0] && (bool) $rosters[0])
                 {
                     try {
-                        $weeks = $state->week <= $league->settings->playoff_week_start ? $state->week : $league->settings->playoff_week_start;
-                        for ($i=1; $i < $weeks; $i++) {
+                        for ($i=1; $i < $current_week; $i++) {
                             $matchups[$i] = LaravelSleeper::getLeagueMatchups($request->league, $i);
                         }
                     } catch (\Throwable $th) {
@@ -127,6 +128,6 @@ class SelectLeagueController extends Controller
         }
 
 
-        return view('shoulda-coulda-woulda.league-select', compact('valid_league', 'managers', 'overall_losses', 'league', 'weeks'));
+        return view('shoulda-coulda-woulda.league-select', compact('valid_league', 'managers', 'overall_losses', 'league', 'current_week'));
     }
 }
