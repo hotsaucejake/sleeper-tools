@@ -48,7 +48,7 @@ class LeagueData
         }
 
         // Build schedule (just store raw data, let services handle processing)
-        $schedule = new WeeklySchedule();
+        $schedule = new WeeklySchedule;
 
         return new self(
             id: $leagueId,

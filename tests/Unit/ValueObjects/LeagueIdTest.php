@@ -10,11 +10,11 @@ it('creates a valid league id', function () {
 });
 
 it('throws exception for empty league id', function () {
-    expect(fn() => new LeagueId(''))->toThrow(InvalidArgumentException::class, 'League ID must be a non-empty numeric string');
+    expect(fn () => new LeagueId(''))->toThrow(InvalidArgumentException::class, 'League ID must be a non-empty numeric string');
 });
 
 it('throws exception for non-numeric league id', function () {
-    expect(fn() => new LeagueId('abc123'))->toThrow(InvalidArgumentException::class, 'League ID must be a non-empty numeric string');
+    expect(fn () => new LeagueId('abc123'))->toThrow(InvalidArgumentException::class, 'League ID must be a non-empty numeric string');
 });
 
 it('compares league ids correctly', function () {

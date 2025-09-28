@@ -2,17 +2,16 @@
 
 namespace App\Services\Analysis;
 
-use App\Services\Analysis\Contracts\FantasyAnalysisInterface;
-use App\Services\Sleeper\LeagueDataService;
-use App\Services\Fantasy\ScheduleAnalysisService;
-use App\Services\Fantasy\AlternativeRecordsService;
-use App\Services\Fantasy\StrengthOfScheduleService;
-use App\ValueObjects\LeagueId;
 use App\DataTransferObjects\Analysis\AnalysisResults;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Arr;
-use HOTSAUCEJAKE\LaravelSleeper\Facades\LaravelSleeper;
+use App\Services\Analysis\Contracts\FantasyAnalysisInterface;
+use App\Services\Fantasy\AlternativeRecordsService;
+use App\Services\Fantasy\ScheduleAnalysisService;
+use App\Services\Fantasy\StrengthOfScheduleService;
+use App\Services\Sleeper\LeagueDataService;
+use App\ValueObjects\LeagueId;
 use Exception;
+use HOTSAUCEJAKE\LaravelSleeper\Facades\LaravelSleeper;
+use Illuminate\Support\Arr;
 
 class ShouldaCouldaWouldaService implements FantasyAnalysisInterface
 {
@@ -26,10 +25,6 @@ class ShouldaCouldaWouldaService implements FantasyAnalysisInterface
     public function analyzeLeague(LeagueId $leagueId): AnalysisResults
     {
         try {
-            Log::info('=== SHOULDA COULDA WOULDA ANALYSIS STARTED ===', [
-                'league_id' => $leagueId->toString()
-            ]);
-
             // Phase 1: Get complete league data
             $leagueData = $this->leagueDataService->getCompleteLeagueData($leagueId);
 
@@ -44,10 +39,8 @@ class ShouldaCouldaWouldaService implements FantasyAnalysisInterface
             // Phase 4: Calculate strength of schedule
             $strengthOfSchedule = $this->strengthCalculator->generateStrengthAnalysis($managersWithRecords);
 
-            Log::info('=== ANALYSIS COMPLETED SUCCESSFULLY ===');
-
-            if (!($leagueData instanceof \App\DataTransferObjects\League\LeagueData)) {
-                throw new \Exception('Expected LeagueData, got ' . get_class($leagueData));
+            if (! ($leagueData instanceof \App\DataTransferObjects\League\LeagueData)) {
+                throw new \Exception('Expected LeagueData, got '.get_class($leagueData));
             }
 
             return AnalysisResults::success(
@@ -57,12 +50,6 @@ class ShouldaCouldaWouldaService implements FantasyAnalysisInterface
             );
 
         } catch (Exception $e) {
-            Log::error('Analysis failed', [
-                'league_id' => $leagueId->toString(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
             return AnalysisResults::failure($this->getErrorMessage($e));
         }
     }

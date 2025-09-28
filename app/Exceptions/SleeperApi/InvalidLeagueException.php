@@ -2,8 +2,8 @@
 
 namespace App\Exceptions\SleeperApi;
 
-use Exception;
 use App\ValueObjects\LeagueId;
+use Exception;
 
 class InvalidLeagueException extends Exception
 {

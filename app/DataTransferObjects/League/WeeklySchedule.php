@@ -2,8 +2,8 @@
 
 namespace App\DataTransferObjects\League;
 
-use App\ValueObjects\Week;
 use App\ValueObjects\RosterId;
+use App\ValueObjects\Week;
 
 class WeeklySchedule
 {

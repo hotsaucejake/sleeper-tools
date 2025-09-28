@@ -1,49 +1,43 @@
 <?php
 
-use App\Services\Analysis\ShouldaCouldaWouldaService;
-use App\Services\Sleeper\LeagueDataService;
-use App\Services\Fantasy\ScheduleAnalysisService;
-use App\Services\Fantasy\AlternativeRecordsService;
-use App\Services\Fantasy\StrengthOfScheduleService;
-use App\ValueObjects\LeagueId;
-use App\ValueObjects\Week;
 use App\DataTransferObjects\Analysis\AnalysisResults;
 use App\DataTransferObjects\League\WeeklySchedule;
 use App\Exceptions\SleeperApi\InvalidLeagueException;
+use App\Services\Analysis\ShouldaCouldaWouldaService;
+use App\Services\Fantasy\AlternativeRecordsService;
+use App\Services\Fantasy\ScheduleAnalysisService;
+use App\Services\Fantasy\StrengthOfScheduleService;
+use App\Services\Sleeper\LeagueDataService;
+use App\ValueObjects\LeagueId;
+use App\ValueObjects\Week;
 use HOTSAUCEJAKE\LaravelSleeper\Facades\LaravelSleeper;
-use Illuminate\Support\Facades\Log;
-
-beforeEach(function () {
-    Log::shouldReceive('info')->andReturn(null);
-    Log::shouldReceive('error')->andReturn(null);
-});
 
 it('analyzes league successfully with all services', function () {
     $leagueId = new LeagueId('123456789');
 
     // Create a proper LeagueData DTO since that's what the interface expects
     $rawLeagueData = (object) ['name' => 'Test League', 'total_rosters' => 2, 'settings' => (object) ['playoff_week_start' => 15]];
-    $initialSchedule = new \App\DataTransferObjects\League\WeeklySchedule();
+    $initialSchedule = new \App\DataTransferObjects\League\WeeklySchedule;
     $managers = [
         1 => ['roster_id' => 1, 'user_id' => 'user1', 'name' => 'Player 1', 'win' => 1, 'loss' => 0],
-        2 => ['roster_id' => 2, 'user_id' => 'user2', 'name' => 'Player 2', 'win' => 0, 'loss' => 1]
+        2 => ['roster_id' => 2, 'user_id' => 'user2', 'name' => 'Player 2', 'win' => 0, 'loss' => 1],
     ];
 
     $rawMatchups = [
         1 => [
             (object) ['roster_id' => 1, 'points' => 120.5, 'matchup_id' => 1],
-            (object) ['roster_id' => 2, 'points' => 115.3, 'matchup_id' => 1]
-        ]
+            (object) ['roster_id' => 2, 'points' => 115.3, 'matchup_id' => 1],
+        ],
     ];
 
     $rawUsers = [
         (object) ['user_id' => 'user1', 'display_name' => 'Player 1', 'avatar' => 'avatar1'],
-        (object) ['user_id' => 'user2', 'display_name' => 'Player 2', 'avatar' => null]
+        (object) ['user_id' => 'user2', 'display_name' => 'Player 2', 'avatar' => null],
     ];
 
     $rawRosters = [
         (object) ['roster_id' => 1, 'owner_id' => 'user1', 'settings' => (object) ['wins' => 1, 'losses' => 0]],
-        (object) ['roster_id' => 2, 'owner_id' => 'user2', 'settings' => (object) ['wins' => 0, 'losses' => 1]]
+        (object) ['roster_id' => 2, 'owner_id' => 'user2', 'settings' => (object) ['wins' => 0, 'losses' => 1]],
     ];
 
     $leagueData = new \App\DataTransferObjects\League\LeagueData(
@@ -61,7 +55,7 @@ it('analyzes league successfully with all services', function () {
     );
 
     // Mock schedule from ScheduleAnalysisService
-    $schedule = new WeeklySchedule();
+    $schedule = new WeeklySchedule;
     $schedule->addMatchup(
         new Week(1),
         new \App\ValueObjects\RosterId(1),
@@ -76,8 +70,8 @@ it('analyzes league successfully with all services', function () {
             'schedule' => [1 => ['score' => 120.5, 'vs' => 2, 'roster_id' => 1]],
             'records' => [
                 1 => ['name' => 'Player 1', 'roster_id' => 1, 'win' => 0, 'loss' => 0],
-                2 => ['name' => 'Player 2', 'roster_id' => 2, 'win' => 0, 'loss' => 0]
-            ]
+                2 => ['name' => 'Player 2', 'roster_id' => 2, 'win' => 0, 'loss' => 0],
+            ],
         ],
         2 => [
             'roster_id' => 2,
@@ -85,9 +79,9 @@ it('analyzes league successfully with all services', function () {
             'schedule' => [1 => ['score' => 115.3, 'vs' => 1, 'roster_id' => 2]],
             'records' => [
                 1 => ['name' => 'Player 1', 'roster_id' => 1, 'win' => 0, 'loss' => 0],
-                2 => ['name' => 'Player 2', 'roster_id' => 2, 'win' => 0, 'loss' => 0]
-            ]
-        ]
+                2 => ['name' => 'Player 2', 'roster_id' => 2, 'win' => 0, 'loss' => 0],
+            ],
+        ],
     ];
 
     // Mock managers with calculated records
@@ -98,8 +92,8 @@ it('analyzes league successfully with all services', function () {
             'schedule' => [1 => ['score' => 120.5, 'vs' => 2, 'roster_id' => 1]],
             'records' => [
                 1 => ['name' => 'Player 1', 'roster_id' => 1, 'win' => 1, 'loss' => 0],
-                2 => ['name' => 'Player 2', 'roster_id' => 2, 'win' => 1, 'loss' => 0]
-            ]
+                2 => ['name' => 'Player 2', 'roster_id' => 2, 'win' => 1, 'loss' => 0],
+            ],
         ],
         2 => [
             'roster_id' => 2,
@@ -107,16 +101,16 @@ it('analyzes league successfully with all services', function () {
             'schedule' => [1 => ['score' => 115.3, 'vs' => 1, 'roster_id' => 2]],
             'records' => [
                 1 => ['name' => 'Player 1', 'roster_id' => 1, 'win' => 0, 'loss' => 1],
-                2 => ['name' => 'Player 2', 'roster_id' => 2, 'win' => 0, 'loss' => 1]
-            ]
-        ]
+                2 => ['name' => 'Player 2', 'roster_id' => 2, 'win' => 0, 'loss' => 1],
+            ],
+        ],
     ];
 
     // Mock strength of schedule
     $strengthOfSchedule = [
         'overall_wins' => [1 => 1, 2 => 0],
         'overall_losses' => [2 => 2, 1 => 1], // Sorted by losses desc
-        'rankings' => [2, 1]
+        'rankings' => [2, 1],
     ];
 
     // Mock the LaravelSleeper facade
@@ -230,7 +224,7 @@ it('maps different exception types to appropriate error messages', function () {
     // Test InsufficientDataException
     $mockLeagueDataService->shouldReceive('getCompleteLeagueData')
         ->once()
-        ->andThrow(new \App\Exceptions\SleeperApi\InsufficientDataException());
+        ->andThrow(new \App\Exceptions\SleeperApi\InsufficientDataException);
 
     $result = $service->analyzeLeague($leagueId);
     expect($result->getError())->toBe('Could not retrieve your league settings!');
@@ -238,7 +232,7 @@ it('maps different exception types to appropriate error messages', function () {
     // Test ApiConnectionException
     $mockLeagueDataService->shouldReceive('getCompleteLeagueData')
         ->once()
-        ->andThrow(new \App\Exceptions\SleeperApi\ApiConnectionException());
+        ->andThrow(new \App\Exceptions\SleeperApi\ApiConnectionException);
 
     $result = $service->analyzeLeague($leagueId);
     expect($result->getError())->toBe('There was an error fetching matchups!');
@@ -252,19 +246,19 @@ it('builds managers array correctly from rosters and users', function () {
 
     $rosters = [
         (object) ['roster_id' => 1, 'owner_id' => 'user1', 'settings' => (object) ['wins' => 2, 'losses' => 1]],
-        (object) ['roster_id' => 2, 'owner_id' => 'user2', 'settings' => (object) ['wins' => 1, 'losses' => 2]]
+        (object) ['roster_id' => 2, 'owner_id' => 'user2', 'settings' => (object) ['wins' => 1, 'losses' => 2]],
     ];
 
     $users = [
         (object) ['user_id' => 'user1', 'display_name' => 'Player 1', 'avatar' => 'avatar1'],
-        (object) ['user_id' => 'user2', 'display_name' => 'Player 2', 'metadata' => (object) ['avatar' => 'meta_avatar2']]
+        (object) ['user_id' => 'user2', 'display_name' => 'Player 2', 'metadata' => (object) ['avatar' => 'meta_avatar2']],
     ];
 
     $mockServices = [
         Mockery::mock(LeagueDataService::class),
         Mockery::mock(ScheduleAnalysisService::class),
         Mockery::mock(AlternativeRecordsService::class),
-        Mockery::mock(StrengthOfScheduleService::class)
+        Mockery::mock(StrengthOfScheduleService::class),
     ];
 
     $service = new ShouldaCouldaWouldaService(...$mockServices);

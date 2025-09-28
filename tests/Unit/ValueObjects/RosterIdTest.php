@@ -10,11 +10,11 @@ it('creates a valid roster id', function () {
 });
 
 it('throws exception for zero roster id', function () {
-    expect(fn() => new RosterId(0))->toThrow(InvalidArgumentException::class, 'Roster ID must be a positive integer');
+    expect(fn () => new RosterId(0))->toThrow(InvalidArgumentException::class, 'Roster ID must be a positive integer');
 });
 
 it('throws exception for negative roster id', function () {
-    expect(fn() => new RosterId(-1))->toThrow(InvalidArgumentException::class, 'Roster ID must be a positive integer');
+    expect(fn () => new RosterId(-1))->toThrow(InvalidArgumentException::class, 'Roster ID must be a positive integer');
 });
 
 it('compares roster ids correctly', function () {

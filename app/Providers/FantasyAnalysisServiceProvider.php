@@ -2,15 +2,15 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use App\Services\Sleeper\Contracts\SleeperApiInterface;
-use App\Services\Sleeper\SleeperApiService;
-use App\Services\Fantasy\Contracts\ScheduleAnalysisInterface;
-use App\Services\Fantasy\ScheduleAnalysisService;
-use App\Services\Fantasy\Contracts\RecordsCalculatorInterface;
-use App\Services\Fantasy\AlternativeRecordsService;
 use App\Services\Analysis\Contracts\FantasyAnalysisInterface;
 use App\Services\Analysis\ShouldaCouldaWouldaService;
+use App\Services\Fantasy\AlternativeRecordsService;
+use App\Services\Fantasy\Contracts\RecordsCalculatorInterface;
+use App\Services\Fantasy\Contracts\ScheduleAnalysisInterface;
+use App\Services\Fantasy\ScheduleAnalysisService;
+use App\Services\Sleeper\Contracts\SleeperApiInterface;
+use App\Services\Sleeper\SleeperApiService;
+use Illuminate\Support\ServiceProvider;
 
 class FantasyAnalysisServiceProvider extends ServiceProvider
 {

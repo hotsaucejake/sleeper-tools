@@ -1,30 +1,24 @@
 <?php
 
-use App\Services\Fantasy\ScheduleAnalysisService;
 use App\DataTransferObjects\League\WeeklySchedule;
-use Illuminate\Support\Facades\Log;
-
-beforeEach(function () {
-    Log::shouldReceive('info')->andReturn(null);
-    Log::shouldReceive('debug')->andReturn(null);
-});
+use App\Services\Fantasy\ScheduleAnalysisService;
 
 it('builds schedule from matchups correctly', function () {
-    $service = new ScheduleAnalysisService();
+    $service = new ScheduleAnalysisService;
 
     $matchups = [
         1 => [
             (object) ['roster_id' => 1, 'points' => 120.5, 'matchup_id' => 1],
             (object) ['roster_id' => 2, 'points' => 115.3, 'matchup_id' => 1],
             (object) ['roster_id' => 3, 'points' => 110.0, 'matchup_id' => 2],
-            (object) ['roster_id' => 4, 'points' => 105.7, 'matchup_id' => 2]
+            (object) ['roster_id' => 4, 'points' => 105.7, 'matchup_id' => 2],
         ],
         2 => [
             (object) ['roster_id' => 1, 'points' => 130.2, 'matchup_id' => 1],
             (object) ['roster_id' => 3, 'points' => 125.8, 'matchup_id' => 1],
             (object) ['roster_id' => 2, 'points' => 118.5, 'matchup_id' => 2],
-            (object) ['roster_id' => 4, 'points' => 112.3, 'matchup_id' => 2]
-        ]
+            (object) ['roster_id' => 4, 'points' => 112.3, 'matchup_id' => 2],
+        ],
     ];
 
     $result = $service->buildScheduleFromMatchups($matchups);
@@ -41,14 +35,14 @@ it('builds schedule from matchups correctly', function () {
 });
 
 it('adds schedules to managers correctly', function () {
-    $service = new ScheduleAnalysisService();
+    $service = new ScheduleAnalysisService;
 
     $managers = [
         1 => ['roster_id' => 1, 'name' => 'Team 1'],
-        2 => ['roster_id' => 2, 'name' => 'Team 2']
+        2 => ['roster_id' => 2, 'name' => 'Team 2'],
     ];
 
-    $schedule = new WeeklySchedule();
+    $schedule = new WeeklySchedule;
     $schedule->addMatchup(
         new \App\ValueObjects\Week(1),
         new \App\ValueObjects\RosterId(1),
@@ -73,12 +67,12 @@ it('adds schedules to managers correctly', function () {
 });
 
 it('initializes records for all managers', function () {
-    $service = new ScheduleAnalysisService();
+    $service = new ScheduleAnalysisService;
 
     $managers = [
         1 => ['roster_id' => 1, 'name' => 'Team 1'],
         2 => ['roster_id' => 2, 'name' => 'Team 2'],
-        3 => ['roster_id' => 3, 'name' => 'Team 3']
+        3 => ['roster_id' => 3, 'name' => 'Team 3'],
     ];
 
     $result = $service->initializeRecords($managers);
@@ -93,7 +87,7 @@ it('initializes records for all managers', function () {
 });
 
 it('handles empty matchups gracefully', function () {
-    $service = new ScheduleAnalysisService();
+    $service = new ScheduleAnalysisService;
 
     $matchups = [];
 

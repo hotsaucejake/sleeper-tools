@@ -1,16 +1,5 @@
 <?php
 
-use HOTSAUCEJAKE\LaravelSleeper\Facades\LaravelSleeper;
-use Illuminate\Support\Facades\Log;
-
-beforeEach(function () {
-    // Clear logs before each test
-    Log::shouldReceive('info')->andReturn(null);
-    Log::shouldReceive('debug')->andReturn(null);
-    Log::shouldReceive('warning')->andReturn(null);
-    Log::shouldReceive('error')->andReturn(null);
-});
-
 it('displays league selection form when no league parameter is provided', function () {
     $response = $this->get('/shoulda-coulda-woulda');
 
@@ -38,12 +27,12 @@ it('successfully analyzes a valid league and displays results', function () {
             'schedule' => [
                 1 => ['score' => 158.62, 'vs' => 2, 'roster_id' => 1],
                 2 => ['score' => 91.6, 'vs' => 3, 'roster_id' => 1],
-                3 => ['score' => 96.26, 'vs' => 4, 'roster_id' => 1]
+                3 => ['score' => 96.26, 'vs' => 4, 'roster_id' => 1],
             ],
             'records' => [
                 1 => ['name' => 'Test Manager 1', 'roster_id' => 1, 'win' => 1, 'loss' => 2],
-                2 => ['name' => 'Test Manager 2', 'roster_id' => 2, 'win' => 2, 'loss' => 1]
-            ]
+                2 => ['name' => 'Test Manager 2', 'roster_id' => 2, 'win' => 2, 'loss' => 1],
+            ],
         ],
         2 => [
             'roster_id' => 2,
@@ -55,13 +44,13 @@ it('successfully analyzes a valid league and displays results', function () {
             'schedule' => [
                 1 => ['score' => 140.25, 'vs' => 1, 'roster_id' => 2],
                 2 => ['score' => 105.8, 'vs' => 3, 'roster_id' => 2],
-                3 => ['score' => 88.15, 'vs' => 4, 'roster_id' => 2]
+                3 => ['score' => 88.15, 'vs' => 4, 'roster_id' => 2],
             ],
             'records' => [
                 1 => ['name' => 'Test Manager 1', 'roster_id' => 1, 'win' => 2, 'loss' => 1],
-                2 => ['name' => 'Test Manager 2', 'roster_id' => 2, 'win' => 1, 'loss' => 2]
-            ]
-        ]
+                2 => ['name' => 'Test Manager 2', 'roster_id' => 2, 'win' => 1, 'loss' => 2],
+            ],
+        ],
     ];
 
     $strengthOfSchedule = [1 => 15, 2 => 25];
@@ -73,14 +62,14 @@ it('successfully analyzes a valid league and displays results', function () {
         playoffWeekStart: new \App\ValueObjects\Week(15),
         currentWeek: new \App\ValueObjects\Week(4),
         managers: $managers,
-        schedule: new \App\DataTransferObjects\League\WeeklySchedule(),
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
         rawLeagueData: (object) [
             'name' => 'Test League',
             'total_rosters' => 10,
             'settings' => (object) [
                 'league_average_match' => false,
-                'playoff_week_start' => 15
-            ]
+                'playoff_week_start' => 15,
+            ],
         ]
     );
 
@@ -112,10 +101,10 @@ it('successfully analyzes a valid league and displays results', function () {
     expect($managers)->toBeArray()
         ->and(count($managers))->toBe(2)
         ->and($managers[1])->toHaveKeys([
-            'roster_id', 'user_id', 'win', 'loss', 'name', 'avatar', 'schedule', 'records'
+            'roster_id', 'user_id', 'win', 'loss', 'name', 'avatar', 'schedule', 'records',
         ])
         ->and($managers[2])->toHaveKeys([
-            'roster_id', 'user_id', 'win', 'loss', 'name', 'avatar', 'schedule', 'records'
+            'roster_id', 'user_id', 'win', 'loss', 'name', 'avatar', 'schedule', 'records',
         ]);
 
     // Verify overall losses data
@@ -220,8 +209,8 @@ it('correctly calculates alternative records for specific scenarios', function (
             'schedule' => [1 => ['score' => 158.62], 2 => ['score' => 91.6], 3 => ['score' => 96.26]],
             'records' => [
                 1 => ['name' => 'Test Manager 1', 'roster_id' => 1, 'win' => 1, 'loss' => 2],
-                2 => ['name' => 'Double2ChinMan', 'roster_id' => 2, 'win' => 2, 'loss' => 1]
-            ]
+                2 => ['name' => 'Double2ChinMan', 'roster_id' => 2, 'win' => 2, 'loss' => 1],
+            ],
         ],
         2 => [
             'roster_id' => 2,
@@ -232,9 +221,9 @@ it('correctly calculates alternative records for specific scenarios', function (
             'schedule' => [1 => ['score' => 140.25], 2 => ['score' => 105.8], 3 => ['score' => 88.15]],
             'records' => [
                 1 => ['name' => 'Test Manager 1', 'roster_id' => 1, 'win' => 2, 'loss' => 1],
-                2 => ['name' => 'Double2ChinMan', 'roster_id' => 2, 'win' => 1, 'loss' => 2]
-            ]
-        ]
+                2 => ['name' => 'Double2ChinMan', 'roster_id' => 2, 'win' => 1, 'loss' => 2],
+            ],
+        ],
     ];
 
     $leagueData = new \App\DataTransferObjects\League\LeagueData(
@@ -244,14 +233,14 @@ it('correctly calculates alternative records for specific scenarios', function (
         playoffWeekStart: new \App\ValueObjects\Week(15),
         currentWeek: new \App\ValueObjects\Week(4),
         managers: $managers,
-        schedule: new \App\DataTransferObjects\League\WeeklySchedule(),
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
         rawLeagueData: (object) [
             'name' => 'Test League',
             'total_rosters' => 10,
             'settings' => (object) [
                 'league_average_match' => false,
-                'playoff_week_start' => 15
-            ]
+                'playoff_week_start' => 15,
+            ],
         ]
     );
 
@@ -292,7 +281,7 @@ it('correctly handles league average matching setting', function () {
     $rawLeagueData = (object) [
         'name' => 'Test League',
         'total_rosters' => 10,
-        'settings' => (object) ['league_average_match' => 1]
+        'settings' => (object) ['league_average_match' => 1],
     ];
 
     $leagueData = new \App\DataTransferObjects\League\LeagueData(
@@ -302,7 +291,7 @@ it('correctly handles league average matching setting', function () {
         playoffWeekStart: new \App\ValueObjects\Week(15),
         currentWeek: new \App\ValueObjects\Week(4),
         managers: [],
-        schedule: new \App\DataTransferObjects\League\WeeklySchedule(),
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
         rawLeagueData: $rawLeagueData
     );
 
@@ -339,7 +328,7 @@ it('correctly sorts strength of schedule by overall losses', function () {
             'win' => 3, 'loss' => 0,
             'avatar' => null,
             'schedule' => [],
-            'records' => []
+            'records' => [],
         ],
         2 => [
             'roster_id' => 2,
@@ -348,7 +337,7 @@ it('correctly sorts strength of schedule by overall losses', function () {
             'win' => 1, 'loss' => 2,
             'avatar' => null,
             'schedule' => [],
-            'records' => []
+            'records' => [],
         ],
         3 => [
             'roster_id' => 3,
@@ -357,8 +346,8 @@ it('correctly sorts strength of schedule by overall losses', function () {
             'win' => 2, 'loss' => 1,
             'avatar' => null,
             'schedule' => [],
-            'records' => []
-        ]
+            'records' => [],
+        ],
     ];
 
     $leagueData = new \App\DataTransferObjects\League\LeagueData(
@@ -368,14 +357,14 @@ it('correctly sorts strength of schedule by overall losses', function () {
         playoffWeekStart: new \App\ValueObjects\Week(15),
         currentWeek: new \App\ValueObjects\Week(4),
         managers: $managers,
-        schedule: new \App\DataTransferObjects\League\WeeklySchedule(),
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
         rawLeagueData: (object) [
             'name' => 'Test League',
             'total_rosters' => 3,
             'settings' => (object) [
                 'league_average_match' => false,
-                'playoff_week_start' => 15
-            ]
+                'playoff_week_start' => 15,
+            ],
         ]
     );
 
@@ -412,26 +401,26 @@ it('preserves exact scores from API data', function () {
             'roster_id' => 1, 'user_id' => 'user1', 'name' => 'Manager 1',
             'win' => 2, 'loss' => 1, 'avatar' => 'https://example.com/avatar.png',
             'schedule' => [
-                1 => ['score' => 158.62], 2 => ['score' => 91.6], 3 => ['score' => 96.26]
+                1 => ['score' => 158.62], 2 => ['score' => 91.6], 3 => ['score' => 96.26],
             ],
-            'records' => []
+            'records' => [],
         ],
         5 => [
             'roster_id' => 5, 'user_id' => 'user5', 'name' => 'Manager 5',
             'win' => 1, 'loss' => 2, 'avatar' => 'https://example.com/avatar.png',
             'schedule' => [
-                1 => ['score' => 120.0], 2 => ['score' => 149.94], 3 => ['score' => 110.0]
+                1 => ['score' => 120.0], 2 => ['score' => 149.94], 3 => ['score' => 110.0],
             ],
-            'records' => []
+            'records' => [],
         ],
         10 => [
             'roster_id' => 10, 'user_id' => 'user10', 'name' => 'Manager 10',
             'win' => 3, 'loss' => 0, 'avatar' => 'https://example.com/avatar.png',
             'schedule' => [
-                1 => ['score' => 177.86], 2 => ['score' => 135.0], 3 => ['score' => 140.0]
+                1 => ['score' => 177.86], 2 => ['score' => 135.0], 3 => ['score' => 140.0],
             ],
-            'records' => []
-        ]
+            'records' => [],
+        ],
     ];
 
     $leagueData = new \App\DataTransferObjects\League\LeagueData(
@@ -441,7 +430,7 @@ it('preserves exact scores from API data', function () {
         playoffWeekStart: new \App\ValueObjects\Week(15),
         currentWeek: new \App\ValueObjects\Week(4),
         managers: $managers,
-        schedule: new \App\DataTransferObjects\League\WeeklySchedule(),
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
         rawLeagueData: (object) ['name' => 'Test League']
     );
 
@@ -481,7 +470,7 @@ it('correctly calculates current week as minimum of sport state and playoff star
         playoffWeekStart: new \App\ValueObjects\Week(15),
         currentWeek: new \App\ValueObjects\Week(3), // min(3, 15) = 3
         managers: [],
-        schedule: new \App\DataTransferObjects\League\WeeklySchedule(),
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
         rawLeagueData: (object) ['name' => 'Test League']
     );
 

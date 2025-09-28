@@ -10,7 +10,7 @@ it('creates a valid score', function () {
 });
 
 it('throws exception for negative score', function () {
-    expect(fn() => new Score(-10.5))->toThrow(InvalidArgumentException::class, 'Score cannot be negative');
+    expect(fn () => new Score(-10.5))->toThrow(InvalidArgumentException::class, 'Score cannot be negative');
 });
 
 it('accepts zero score', function () {

@@ -44,7 +44,7 @@ class AnalysisResults
 
     public function isFailure(): bool
     {
-        return !$this->success;
+        return ! $this->success;
     }
 
     public function getError(): ?string

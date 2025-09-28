@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SelectLeagueRequest;
 use App\Services\Analysis\Contracts\FantasyAnalysisInterface;
 use App\ValueObjects\LeagueId;
-use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 class SelectLeagueController extends Controller
@@ -22,21 +21,19 @@ class SelectLeagueController extends Controller
      */
     public function __invoke(SelectLeagueRequest $request)
     {
-        if (!$request->has('league')) {
+        if (! $request->has('league')) {
             return view('shoulda-coulda-woulda.league-select', [
                 'valid_league' => false,
                 'managers' => [],
                 'overall_losses' => [],
                 'league' => null,
-                'current_week' => null
+                'current_week' => null,
             ]);
         }
 
         try {
             $leagueId = new LeagueId($request->league);
-            Log::info('leagueId', [$leagueId]);
             $results = $this->analysisService->analyzeLeague($leagueId);
-            Log::info('results', [$results]);
 
             if ($results->isFailure()) {
                 return redirect()
@@ -49,7 +46,7 @@ class SelectLeagueController extends Controller
                 'managers' => $results->managers,
                 'overall_losses' => $results->strengthOfSchedule,
                 'league' => $results->league->rawLeagueData,
-                'current_week' => $results->league->currentWeek
+                'current_week' => $results->league->currentWeek,
             ]);
 
         } catch (InvalidArgumentException $e) {

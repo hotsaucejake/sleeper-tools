@@ -2,8 +2,8 @@
 
 namespace App\Services\Analysis\Contracts;
 
-use App\ValueObjects\LeagueId;
 use App\DataTransferObjects\Analysis\AnalysisResults;
+use App\ValueObjects\LeagueId;
 
 interface FantasyAnalysisInterface
 {

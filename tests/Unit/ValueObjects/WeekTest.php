@@ -10,11 +10,11 @@ it('creates a valid week', function () {
 });
 
 it('throws exception for week below 1', function () {
-    expect(fn() => new Week(0))->toThrow(InvalidArgumentException::class, 'Week must be between 1 and 22');
+    expect(fn () => new Week(0))->toThrow(InvalidArgumentException::class, 'Week must be between 1 and 22');
 });
 
 it('throws exception for week above 22', function () {
-    expect(fn() => new Week(23))->toThrow(InvalidArgumentException::class, 'Week must be between 1 and 22');
+    expect(fn () => new Week(23))->toThrow(InvalidArgumentException::class, 'Week must be between 1 and 22');
 });
 
 it('identifies regular season weeks correctly', function () {

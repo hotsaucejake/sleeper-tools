@@ -10,7 +10,7 @@ class LeagueId
 
     public function __construct(string $value)
     {
-        if (empty($value) || !is_numeric($value)) {
+        if (empty($value) || ! is_numeric($value)) {
             throw new InvalidArgumentException('League ID must be a non-empty numeric string');
         }
 

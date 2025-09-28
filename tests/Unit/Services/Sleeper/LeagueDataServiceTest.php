@@ -1,16 +1,10 @@
 <?php
 
-use App\Services\Sleeper\LeagueDataService;
+use App\Exceptions\SleeperApi\InsufficientDataException;
 use App\Services\Sleeper\Contracts\SleeperApiInterface;
+use App\Services\Sleeper\LeagueDataService;
 use App\ValueObjects\LeagueId;
 use App\ValueObjects\Week;
-use App\Exceptions\SleeperApi\InsufficientDataException;
-use Illuminate\Support\Facades\Log;
-
-beforeEach(function () {
-    Log::shouldReceive('info')->andReturn(null);
-    Log::shouldReceive('debug')->andReturn(null);
-});
 
 it('fetches complete league data successfully', function () {
     $leagueId = new LeagueId('123456789');
@@ -20,24 +14,24 @@ it('fetches complete league data successfully', function () {
     $league = (object) [
         'name' => 'Test League',
         'total_rosters' => 2,
-        'settings' => (object) ['playoff_week_start' => 15]
+        'settings' => (object) ['playoff_week_start' => 15],
     ];
 
     $users = [
         (object) ['user_id' => 'user1', 'display_name' => 'Player 1', 'avatar' => 'avatar1'],
-        (object) ['user_id' => 'user2', 'display_name' => 'Player 2', 'avatar' => null]
+        (object) ['user_id' => 'user2', 'display_name' => 'Player 2', 'avatar' => null],
     ];
 
     $rosters = [
         (object) ['roster_id' => 1, 'owner_id' => 'user1', 'settings' => (object) ['wins' => 2, 'losses' => 1]],
-        (object) ['roster_id' => 2, 'owner_id' => 'user2', 'settings' => (object) ['wins' => 1, 'losses' => 2]]
+        (object) ['roster_id' => 2, 'owner_id' => 'user2', 'settings' => (object) ['wins' => 1, 'losses' => 2]],
     ];
 
     $state = (object) ['week' => 4, 'season' => '2024'];
 
     $matchups = [
         (object) ['roster_id' => 1, 'points' => 120.5, 'matchup_id' => 1],
-        (object) ['roster_id' => 2, 'points' => 115.3, 'matchup_id' => 1]
+        (object) ['roster_id' => 2, 'points' => 115.3, 'matchup_id' => 1],
     ];
 
     $mockApi->shouldReceive('getLeague')->once()->with($leagueId)->andReturn($league);
@@ -84,7 +78,7 @@ it('throws exception for empty users', function () {
     $rosters = [(object) ['roster_id' => 1]];
     $state = (object) ['week' => 4];
 
-    expect(fn() => $service->validateLeagueData($league, $users, $rosters, $state))
+    expect(fn () => $service->validateLeagueData($league, $users, $rosters, $state))
         ->toThrow(InsufficientDataException::class, 'No users found in league');
 });
 
@@ -97,7 +91,7 @@ it('throws exception for empty rosters', function () {
     $rosters = []; // Empty rosters
     $state = (object) ['week' => 4];
 
-    expect(fn() => $service->validateLeagueData($league, $users, $rosters, $state))
+    expect(fn () => $service->validateLeagueData($league, $users, $rosters, $state))
         ->toThrow(InsufficientDataException::class, 'No rosters found in league');
 });
 
@@ -138,6 +132,6 @@ it('throws exception for invalid current week', function () {
     $rosters = [(object) ['roster_id' => 1]];
     $state = (object) ['week' => 0]; // Invalid week
 
-    expect(fn() => $service->validateLeagueData($league, $users, $rosters, $state))
+    expect(fn () => $service->validateLeagueData($league, $users, $rosters, $state))
         ->toThrow(InsufficientDataException::class, 'Invalid current week calculated');
 });

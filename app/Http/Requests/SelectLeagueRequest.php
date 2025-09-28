@@ -14,7 +14,7 @@ class SelectLeagueRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'league' => 'sometimes|required|string'
+            'league' => 'sometimes|required|string',
         ];
     }
 
@@ -22,7 +22,7 @@ class SelectLeagueRequest extends FormRequest
     {
         return [
             'league.required' => 'League ID is required',
-            'league.string' => 'League ID must be a string'
+            'league.string' => 'League ID must be a string',
         ];
     }
 }

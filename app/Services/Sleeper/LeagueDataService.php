@@ -2,13 +2,11 @@
 
 namespace App\Services\Sleeper;
 
-use App\Services\Sleeper\Contracts\SleeperApiInterface;
 use App\DataTransferObjects\League\LeagueData;
-use App\DataTransferObjects\League\WeeklySchedule;
+use App\Exceptions\SleeperApi\InsufficientDataException;
+use App\Services\Sleeper\Contracts\SleeperApiInterface;
 use App\ValueObjects\LeagueId;
 use App\ValueObjects\Week;
-use App\Exceptions\SleeperApi\InsufficientDataException;
-use Illuminate\Support\Facades\Log;
 
 class LeagueDataService
 {
@@ -18,8 +16,6 @@ class LeagueDataService
 
     public function getCompleteLeagueData(LeagueId $leagueId): LeagueData
     {
-        Log::info('=== FETCHING COMPLETE LEAGUE DATA ===', ['league_id' => $leagueId->toString()]);
-
         // Fetch all required data
         $league = $this->sleeperApi->getLeague($leagueId);
         $users = $this->sleeperApi->getLeagueUsers($leagueId);
@@ -34,12 +30,6 @@ class LeagueDataService
 
         // Fetch matchup data for all weeks
         $matchups = $this->fetchAllMatchups($leagueId, $currentWeek);
-
-        Log::info('League data fetch completed', [
-            'league_id' => $leagueId->toString(),
-            'weeks_fetched' => count($matchups),
-            'managers_count' => count($rosters)
-        ]);
 
         // Return LeagueData DTO
         return LeagueData::fromSleeperData(
@@ -68,23 +58,11 @@ class LeagueDataService
         if (empty($rosters)) {
             throw new InsufficientDataException('No rosters found in league');
         }
-
-        Log::debug('League data validation passed', [
-            'current_week' => $currentWeek,
-            'users_count' => count($users),
-            'rosters_count' => count($rosters)
-        ]);
     }
 
     public function getCurrentAnalysisWeek(object $state, int $playoffStart): Week
     {
         $currentWeek = min($state->week, $playoffStart);
-
-        Log::debug('Analysis week calculated', [
-            'sport_state_week' => $state->week,
-            'playoff_start' => $playoffStart,
-            'analysis_week' => $currentWeek
-        ]);
 
         return new Week($currentWeek);
     }
@@ -93,24 +71,14 @@ class LeagueDataService
     {
         $matchups = [];
 
-        Log::debug('Fetching matchups for analysis', [
-            'league_id' => $leagueId->toString(),
-            'weeks_to_fetch' => $currentWeek->toInt() - 1
-        ]);
-
         for ($i = 1; $i < $currentWeek->toInt(); $i++) {
             $week = new Week($i);
             $weekMatchups = $this->sleeperApi->getLeagueMatchups($leagueId, $week);
 
-            if (!empty($weekMatchups)) {
+            if (! empty($weekMatchups)) {
                 $matchups[$i] = $weekMatchups;
             }
         }
-
-        Log::info('All matchups fetched', [
-            'total_weeks' => count($matchups),
-            'weeks' => array_keys($matchups)
-        ]);
 
         return $matchups;
     }

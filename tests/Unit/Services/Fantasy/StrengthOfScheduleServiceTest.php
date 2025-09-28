@@ -1,37 +1,32 @@
 <?php
 
 use App\Services\Fantasy\StrengthOfScheduleService;
-use Illuminate\Support\Facades\Log;
-
-beforeEach(function () {
-    Log::shouldReceive('info')->andReturn(null);
-});
 
 it('calculates overall wins and losses correctly', function () {
-    $service = new StrengthOfScheduleService();
+    $service = new StrengthOfScheduleService;
 
     $managers = [
         1 => [
             'records' => [
                 1 => ['win' => 2, 'loss' => 1],
                 2 => ['win' => 1, 'loss' => 2],
-                3 => ['win' => 3, 'loss' => 0]
-            ]
+                3 => ['win' => 3, 'loss' => 0],
+            ],
         ],
         2 => [
             'records' => [
                 1 => ['win' => 1, 'loss' => 2],
                 2 => ['win' => 2, 'loss' => 1],
-                3 => ['win' => 0, 'loss' => 3]
-            ]
+                3 => ['win' => 0, 'loss' => 3],
+            ],
         ],
         3 => [
             'records' => [
                 1 => ['win' => 0, 'loss' => 3],
                 2 => ['win' => 3, 'loss' => 0],
-                3 => ['win' => 1, 'loss' => 2]
-            ]
-        ]
+                3 => ['win' => 1, 'loss' => 2],
+            ],
+        ],
     ];
 
     $result = $service->calculateOverallWinsLosses($managers);
@@ -54,12 +49,12 @@ it('calculates overall wins and losses correctly', function () {
 });
 
 it('ranks by strength of schedule correctly', function () {
-    $service = new StrengthOfScheduleService();
+    $service = new StrengthOfScheduleService;
 
     $overallLosses = [
         1 => 15, // Easiest schedule (fewest losses)
         2 => 25, // Hardest schedule (most losses)
-        3 => 20  // Middle
+        3 => 20,  // Middle
     ];
 
     $result = $service->rankByStrengthOfSchedule($overallLosses);
@@ -72,21 +67,21 @@ it('ranks by strength of schedule correctly', function () {
 });
 
 it('generates complete strength analysis', function () {
-    $service = new StrengthOfScheduleService();
+    $service = new StrengthOfScheduleService;
 
     $managers = [
         1 => [
             'records' => [
                 1 => ['win' => 2, 'loss' => 1],
-                2 => ['win' => 1, 'loss' => 2]
-            ]
+                2 => ['win' => 1, 'loss' => 2],
+            ],
         ],
         2 => [
             'records' => [
                 1 => ['win' => 1, 'loss' => 2],
-                2 => ['win' => 2, 'loss' => 1]
-            ]
-        ]
+                2 => ['win' => 2, 'loss' => 1],
+            ],
+        ],
     ];
 
     $result = $service->generateStrengthAnalysis($managers);
@@ -99,7 +94,7 @@ it('generates complete strength analysis', function () {
 });
 
 it('handles empty managers array', function () {
-    $service = new StrengthOfScheduleService();
+    $service = new StrengthOfScheduleService;
 
     $managers = [];
 
