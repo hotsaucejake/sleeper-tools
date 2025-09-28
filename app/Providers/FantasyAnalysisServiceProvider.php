@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Services\Analysis\Contracts\FantasyAnalysisInterface;
+use App\Services\Analysis\Contracts\PerformanceAwardsInterface;
+use App\Services\Analysis\PerformanceAwardsService;
 use App\Services\Analysis\ShouldaCouldaWouldaService;
 use App\Services\Fantasy\AlternativeRecordsService;
 use App\Services\Fantasy\Contracts\RecordsCalculatorInterface;
@@ -23,8 +25,9 @@ class FantasyAnalysisServiceProvider extends ServiceProvider
         $this->app->bind(ScheduleAnalysisInterface::class, ScheduleAnalysisService::class);
         $this->app->bind(RecordsCalculatorInterface::class, AlternativeRecordsService::class);
 
-        // Bind Orchestration Service
+        // Bind Orchestration Services
         $this->app->bind(FantasyAnalysisInterface::class, ShouldaCouldaWouldaService::class);
+        $this->app->bind(PerformanceAwardsInterface::class, PerformanceAwardsService::class);
     }
 
     public function boot(): void
