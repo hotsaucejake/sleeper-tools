@@ -26,6 +26,36 @@ An advanced fantasy football analysis tool that calculates alternative win/loss 
 
 For detailed technical documentation, see [shoulda-coulda-woulda.md](./shoulda-coulda-woulda.md).
 
+### Performance Awards
+
+A comprehensive weekly awards system that recognizes outstanding (and not-so-outstanding) performances across your Sleeper league.
+
+**What it does:**
+- Analyzes weekly performances and assigns fun awards to managers
+- Calculates optimal lineup efficiency to identify best and worst managers
+- Tracks cumulative award tallies throughout the season
+- Displays detailed player information with avatars and statistics
+
+**Award Categories:**
+- **The Money Shot** 💰: Highest scoring player of the week
+- **The Taco** 🌮: Manager with the lowest total score
+- **Best Manager** 🔥: Highest optimal lineup efficiency percentage
+- **Worst Manager** 🤔: Lowest optimal lineup efficiency percentage
+- **Biggest Blowout** 😂: Largest margin of victory
+- **Narrow Victory** 😱: Smallest winning margin
+- **Overachiever** 🤓: Scored highest above projected points
+- **Below Expectation** 💀: Scored lowest below projected points
+- **Position Awards** ⭐: Best QB, RB, WR, TE, K, and DEF performances
+- **Benchwarmer Awards** 👀: Best bench players by position
+- **The Ron Jeremy Performance Award** 🍆: Most points scored on the bench
+
+**Key Features:**
+- Week-by-week analysis with previous completed week as default
+- Position-aware optimal lineup calculations for accurate manager efficiency
+- Player avatars and detailed stats from Sleeper's database
+- Cumulative award tallies showing season-long performance trends
+- Responsive design matching the application's aesthetic
+
 ## Planned Tools
 
 This project is designed to expand with additional analysis tools based on league data and statistics:
@@ -113,6 +143,13 @@ If you prefer using Docker:
 3. Click "Analyze League" to generate comprehensive statistics
 4. Explore team cards and strength of schedule rankings
 
+### Performance Awards
+
+1. From the dashboard, click "Performance Awards"
+2. Select the week you want to analyze (defaults to most recent completed week)
+3. View all weekly awards with detailed player information
+4. Check the award tallies table to see cumulative season performance
+
 ### Finding Your League ID
 
 Your Sleeper League ID is the numeric value in your league URL:
@@ -161,6 +198,7 @@ The application follows a service-oriented architecture with clear separation of
 ### Key Services
 
 - `ShouldaCouldaWouldaService`: Main analysis orchestration
+- `PerformanceAwardsService`: Weekly award calculations and optimal lineup analysis
 - `LeagueDataService`: Sleeper API data fetching and validation
 - `ScheduleAnalysisService`: Matchup processing and schedule building
 - `AlternativeRecordsService`: Core "what-if" calculation engine
