@@ -1,0 +1,93 @@
+[
+  {
+    "user_id": "576141898368307200",
+    "username": "hexdrops",
+    "display_name": "hexdrops",
+    "avatar": "a1b2c3d4e5f6",
+    "metadata": {
+      "team_name": "Test Team 1",
+      "avatar": "a1b2c3d4e5f6"
+    }
+  },
+  {
+    "user_id": "722544658202312704",
+    "username": "double2chinman",
+    "display_name": "Double2ChinMan",
+    "avatar": "b2c3d4e5f6a1",
+    "metadata": {
+      "team_name": "Test Team 2"
+    }
+  },
+  {
+    "user_id": "722556429554257920",
+    "username": "jimlombardi",
+    "display_name": "JimLombardi",
+    "avatar": "c3d4e5f6a1b2",
+    "metadata": {
+      "team_name": "Test Team 3"
+    }
+  },
+  {
+    "user_id": "580083426497957888",
+    "username": "pappyvantheman",
+    "display_name": "Pappyvantheman",
+    "avatar": "d4e5f6a1b2c3",
+    "metadata": {
+      "team_name": "Test Team 4"
+    }
+  },
+  {
+    "user_id": "1134155370748411904",
+    "username": "jdmherb",
+    "display_name": "jdmHerb",
+    "avatar": "e5f6a1b2c3d4",
+    "metadata": {
+      "team_name": "Test Team 5"
+    }
+  },
+  {
+    "user_id": "439083208508698624",
+    "username": "mepley23",
+    "display_name": "mepley23",
+    "avatar": "f6a1b2c3d4e5",
+    "metadata": {
+      "team_name": "Test Team 6"
+    }
+  },
+  {
+    "user_id": "734264550697877504",
+    "username": "wookiezcookiez",
+    "display_name": "WookiezCookiez",
+    "avatar": "a1b2c3d4e5f7",
+    "metadata": {
+      "team_name": "Test Team 7"
+    }
+  },
+  {
+    "user_id": "1133125610622140416",
+    "username": "rosco31",
+    "display_name": "Rosco31",
+    "avatar": "b2c3d4e5f6a7",
+    "metadata": {
+      "team_name": "Test Team 8"
+    }
+  },
+  {
+    "user_id": "738482601869905920",
+    "username": "tedlowery",
+    "display_name": "TedLowery",
+    "avatar": "c3d4e5f6a1b7",
+    "metadata": {
+      "team_name": "Test Team 9"
+    }
+  },
+  {
+    "user_id": "576141898368307201",
+    "username": "hotsaucejake",
+    "display_name": "hotsaucejake",
+    "avatar": "d4e5f6a1b2c7",
+    "metadata": {
+      "team_name": "Test Team 10"
+    }
+  }
+]
