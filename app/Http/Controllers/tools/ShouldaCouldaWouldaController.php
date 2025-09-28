@@ -1,57 +1,52 @@
 <?php
 
-namespace App\Http\Controllers\ShouldaCouldaWoulda;
+namespace App\Http\Controllers\tools;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\SelectLeagueRequest;
 use App\Services\Analysis\Contracts\FantasyAnalysisInterface;
 use App\ValueObjects\LeagueId;
+use Illuminate\Http\Request;
 use InvalidArgumentException;
 
-class SelectLeagueController extends Controller
+class ShouldaCouldaWouldaController extends Controller
 {
     public function __construct(
         private FantasyAnalysisInterface $analysisService
     ) {}
 
     /**
-     * Handle the incoming request.
-     *
-     * @return \Illuminate\Http\Response
+     * Display the shoulda coulda woulda analysis results for a league.
      */
-    public function __invoke(SelectLeagueRequest $request)
+    public function __invoke(Request $request)
     {
-        if (! $request->has('league')) {
-            return view('shoulda-coulda-woulda.league-select', [
-                'valid_league' => false,
-                'managers' => [],
-                'overall_losses' => [],
-                'league' => null,
-                'current_week' => null,
-            ]);
+        $leagueIdParam = $request->query('league_id');
+
+        if (!$leagueIdParam) {
+            return redirect()->route('home')->with('error', 'League ID is required.');
         }
 
         try {
-            $leagueId = new LeagueId($request->league);
+            $leagueId = new LeagueId($leagueIdParam);
             $results = $this->analysisService->analyzeLeague($leagueId);
 
             if ($results->isFailure()) {
                 return redirect()
-                    ->route('shoulda-coulda-woulda.select-league')
+                    ->route('dashboard', ['league_id' => $leagueIdParam])
                     ->with('error', $results->getError());
             }
 
-            return view('shoulda-coulda-woulda.league-select', [
+            return view('tools.shoulda-coulda-woulda', [
                 'valid_league' => true,
                 'managers' => $results->managers,
                 'overall_losses' => $results->strengthOfSchedule,
                 'league' => $results->league->rawLeagueData,
                 'current_week' => $results->league->currentWeek,
+                'league_id' => $leagueIdParam,
             ]);
 
         } catch (InvalidArgumentException $e) {
             return redirect()
-                ->route('shoulda-coulda-woulda.select-league')
+                ->route('dashboard', ['league_id' => $leagueIdParam])
                 ->with('error', 'Invalid league ID provided');
         }
     }

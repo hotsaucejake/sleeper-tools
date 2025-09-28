@@ -1,6 +1,8 @@
 <?php
 
-use App\Http\Controllers\ShouldaCouldaWoulda\SelectLeagueController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SelectLeagueController;
+use App\Http\Controllers\tools\ShouldaCouldaWouldaController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,8 +16,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Landing page - League selection
+Route::get('/', SelectLeagueController::class)->name('home');
 
-Route::get('shoulda-coulda-woulda', SelectLeagueController::class)->name('shoulda-coulda-woulda.select-league');
+// Dashboard for tool selection (after valid league ID)
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+// Shoulda Coulda Woulda analysis results
+Route::get('/shoulda-coulda-woulda', ShouldaCouldaWouldaController::class)->name('shoulda-coulda-woulda');
