@@ -15,7 +15,7 @@ class DashboardController extends Controller
     {
         $leagueIdParam = $request->query('league_id');
 
-        if (!$leagueIdParam) {
+        if (! $leagueIdParam) {
             return redirect()->route('landing')->with('error', 'League ID is required.');
         }
 

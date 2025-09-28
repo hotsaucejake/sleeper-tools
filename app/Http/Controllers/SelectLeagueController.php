@@ -13,7 +13,7 @@ class SelectLeagueController extends Controller
      */
     public function __invoke(SelectLeagueRequest $request)
     {
-        if (!$request->has('league')) {
+        if (! $request->has('league')) {
             return view('league-select', [
                 'valid_league' => false,
                 'managers' => [],
