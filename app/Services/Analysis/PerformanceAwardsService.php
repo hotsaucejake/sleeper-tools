@@ -81,7 +81,10 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
     private function loadPlayerData(): void
     {
         if ($this->playerData === null) {
-            $this->playerData = LaravelSleeper::getAllPlayers('nfl');
+            // Cache player data for 7 days (as recommended by Sleeper API docs)
+            $this->playerData = cache()->remember('sleeper_players_nfl', now()->addDays(7), function () {
+                return LaravelSleeper::getAllPlayers('nfl');
+            });
         }
     }
 
@@ -381,12 +384,16 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
         foreach ($positions as $position) {
             if (isset($positionBest[$position])) {
                 $rosterId = $positionBest[$position]['roster_id'];
+                $playerId = $positionBest[$position]['player_id'];
+                $playerInfo = $this->getPlayerInfo($playerId);
+
                 $awards[] = new Award(
                     title: "{$position} of the Week",
                     emoji: '⭐',
                     managerName: $managers[$rosterId]['name'],
                     description: "Started the best {$position} of this week!",
-                    value: $positionBest[$position]['points']
+                    value: $positionBest[$position]['points'],
+                    playerInfo: $playerInfo
                 );
             }
         }
@@ -492,12 +499,16 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
         foreach ($positions as $position) {
             if (isset($benchBest[$position]) && $benchBest[$position]['points'] > 0) {
                 $rosterId = $benchBest[$position]['roster_id'];
+                $playerId = $benchBest[$position]['player_id'];
+                $playerInfo = $this->getPlayerInfo($playerId);
+
                 $awards[] = new Award(
                     title: "{$position} Benchwarmer of the Week",
                     emoji: '👀',
                     managerName: $managers[$rosterId]['name'] ?? 'Unknown Manager',
                     description: "Had the best {$position} benchwarmer this week!",
-                    value: $benchBest[$position]['points']
+                    value: $benchBest[$position]['points'],
+                    playerInfo: $playerInfo
                 );
             }
         }
@@ -510,6 +521,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
         $awards = [];
         $highestPlayerScore = 0;
         $ronJeremyWinner = null;
+        $ronJeremyPlayerId = null;
 
         foreach ($matchups as $matchup) {
             $rosterId = $matchup->roster_id;
@@ -517,21 +529,26 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
             $startersPoints = $matchup->starters_points ?? [];
 
             // Find highest scoring starter on this team
-            foreach ($startersPoints as $points) {
+            foreach ($starters as $index => $playerId) {
+                $points = $startersPoints[$index] ?? 0;
                 if ($points > $highestPlayerScore) {
                     $highestPlayerScore = $points;
                     $ronJeremyWinner = $rosterId;
+                    $ronJeremyPlayerId = $playerId;
                 }
             }
         }
 
-        if ($ronJeremyWinner && $highestPlayerScore > 0) {
+        if ($ronJeremyWinner && $highestPlayerScore > 0 && $ronJeremyPlayerId) {
+            $playerInfo = $this->getPlayerInfo($ronJeremyPlayerId);
+
             $awards[] = new Award(
                 title: 'The Ron Jeremy Performance Award',
                 emoji: '🍆',
                 managerName: $managers[$ronJeremyWinner]['name'] ?? 'Unknown Manager',
                 description: 'Had the highest scoring individual player this week!',
-                value: $highestPlayerScore
+                value: $highestPlayerScore,
+                playerInfo: $playerInfo
             );
         }
 
@@ -566,5 +583,48 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
 
         // Fallback for unknown players
         return 'RB';
+    }
+
+    private function getPlayerInfo(string $playerId): array
+    {
+        // Handle team defenses
+        if (strlen($playerId) <= 4 && ctype_alpha($playerId)) {
+            return [
+                'name' => strtoupper($playerId) . ' DEF',
+                'position' => 'DEF',
+                'team' => strtoupper($playerId),
+                'avatar' => null
+            ];
+        }
+
+        // Look up player in Sleeper player data
+        if (isset($this->playerData->{$playerId})) {
+            $player = $this->playerData->{$playerId};
+
+            $firstName = is_object($player) ? ($player->first_name ?? '') : ($player['first_name'] ?? '');
+            $lastName = is_object($player) ? ($player->last_name ?? '') : ($player['last_name'] ?? '');
+            $position = is_object($player) ? ($player->position ?? 'Unknown') : ($player['position'] ?? 'Unknown');
+            $team = is_object($player) ? ($player->team ?? '') : ($player['team'] ?? '');
+
+            // Use Sleeper's actual avatar pattern
+            $avatarUrl = null;
+            if (!empty($playerId) && is_numeric($playerId)) {
+                $avatarUrl = "https://sleepercdn.com/content/nfl/players/thumb/{$playerId}.jpg";
+            }
+
+            return [
+                'name' => trim($firstName . ' ' . $lastName) ?: 'Unknown Player',
+                'position' => $position,
+                'team' => $team,
+                'avatar' => $avatarUrl
+            ];
+        }
+
+        return [
+            'name' => 'Unknown Player',
+            'position' => 'RB',
+            'team' => '',
+            'avatar' => null
+        ];
     }
 }

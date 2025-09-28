@@ -46,10 +46,43 @@
                 @foreach ($awards as $award)
                     <div class="col-lg-6 col-xl-4 mb-4">
                         <div class="card h-100">
+                            @if ($award->playerInfo && $award->playerInfo['avatar'])
+                                <div class="position-relative">
+                                    <img src="{{ $award->playerInfo['avatar'] }}"
+                                         class="card-img-top player-avatar"
+                                         alt="{{ $award->playerInfo['name'] }}"
+                                         style="height: 200px; object-fit: cover; object-position: top;"
+                                         crossorigin="anonymous"
+                                         loading="lazy"
+                                         onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.querySelector('.no-avatar-emoji').style.display='block';">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-dark fs-6">{{ $award->emoji }}</span>
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="card-body text-center">
-                                <div class="display-1 mb-3">{{ $award->emoji }}</div>
+                                @if (!($award->playerInfo && $award->playerInfo['avatar']))
+                                    <div class="display-1 mb-3">{{ $award->emoji }}</div>
+                                @else
+                                    <div class="display-1 mb-3 no-avatar-emoji" style="display: none;">{{ $award->emoji }}</div>
+                                @endif
+
                                 <h5 class="card-title text-primary">{{ $award->title }}</h5>
                                 <h6 class="card-subtitle mb-2 text-muted">{{ $award->managerName }}</h6>
+
+                                @if ($award->playerInfo)
+                                    <div class="mb-2">
+                                        <h6 class="fw-bold text-dark mb-1">{{ $award->playerInfo['name'] }}</h6>
+                                        <small class="text-muted">
+                                            {{ $award->playerInfo['position'] }}
+                                            @if ($award->playerInfo['team'])
+                                                - {{ strtoupper($award->playerInfo['team']) }}
+                                            @endif
+                                        </small>
+                                    </div>
+                                @endif
+
                                 <p class="card-text">{{ $award->description }}</p>
 
                                 @if ($award->value > 0)

@@ -10,6 +10,7 @@ class Award
         public readonly string $managerName,
         public readonly string $description,
         public readonly float $value,
-        public readonly ?string $secondaryManagerName = null
+        public readonly ?string $secondaryManagerName = null,
+        public readonly ?array $playerInfo = null
     ) {}
 }
