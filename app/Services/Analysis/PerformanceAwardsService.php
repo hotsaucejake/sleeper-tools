@@ -32,7 +32,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
             // Get matchups for the specific week
             $matchups = LaravelSleeper::getLeagueMatchups($leagueId->toString(), $week->toInt());
             if (empty($matchups)) {
-                return PerformanceAwardsResults::failure('No matchup data available for week ' . $week->toInt());
+                return PerformanceAwardsResults::failure('No matchup data available for week '.$week->toInt());
             }
 
             // Build managers array
@@ -48,7 +48,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
             );
 
         } catch (Exception $e) {
-            return PerformanceAwardsResults::failure('Error analyzing performance: ' . $e->getMessage());
+            return PerformanceAwardsResults::failure('Error analyzing performance: '.$e->getMessage());
         }
     }
 
@@ -108,7 +108,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
             'RB Benchwarmer of the Week',
             'WR Benchwarmer of the Week',
             'TE Benchwarmer of the Week',
-            'The Ron Jeremy Performance Award'
+            'The Ron Jeremy Performance Award',
         ];
 
         // Get league data once
@@ -119,7 +119,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
         foreach ($managers as $rosterId => $manager) {
             $tallies[$rosterId] = [
                 'manager' => $manager,
-                'awards' => array_fill_keys($awardTypes, 0)
+                'awards' => array_fill_keys($awardTypes, 0),
             ];
         }
 
@@ -199,7 +199,6 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
         $awards = array_merge($awards, $this->generatePositionAwards($matchups, $managers));
         $awards = array_merge($awards, $this->generateBenchwarmerAwards($matchups, $managers));
 
-
         return $awards;
     }
 
@@ -214,7 +213,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
     private function calculateOptimalLineupScore($matchup): float
     {
         $players = $matchup->players ?? [];
-        $playersPoints = $matchup->players_points ?? (object)[];
+        $playersPoints = $matchup->players_points ?? (object) [];
         $starters = $matchup->starters ?? [];
 
         // Get roster settings to understand position requirements
@@ -226,20 +225,20 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
             $points = $playersPoints->{$playerId} ?? 0;
             $position = $this->getPlayerPosition($playerId);
 
-            if (!isset($playersByPosition[$position])) {
+            if (! isset($playersByPosition[$position])) {
                 $playersByPosition[$position] = [];
             }
 
             $playersByPosition[$position][] = [
                 'id' => $playerId,
                 'points' => $points,
-                'position' => $position
+                'position' => $position,
             ];
         }
 
         // Sort each position group by points (highest first)
         foreach ($playersByPosition as $position => $positionPlayers) {
-            usort($playersByPosition[$position], fn($a, $b) => $b['points'] <=> $a['points']);
+            usort($playersByPosition[$position], fn ($a, $b) => $b['points'] <=> $a['points']);
         }
 
         return $this->calculateOptimalLineup($playersByPosition, $rosterSettings);
@@ -266,7 +265,9 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
 
         // Fill required positions first
         foreach ($rosterSettings as $position => $count) {
-            if ($position === 'FLEX') continue; // Handle flex separately
+            if ($position === 'FLEX') {
+                continue;
+            } // Handle flex separately
 
             $availablePlayers = $playersByPosition[$position] ?? [];
             for ($i = 0; $i < $count && $i < count($availablePlayers); $i++) {
@@ -290,7 +291,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
             }
 
             // Sort all flex candidates by points
-            usort($flexCandidates, fn($a, $b) => $b['points'] <=> $a['points']);
+            usort($flexCandidates, fn ($a, $b) => $b['points'] <=> $a['points']);
 
             // Take the best flex player
             for ($i = 0; $i < $rosterSettings['FLEX'] && $i < count($flexCandidates); $i++) {
@@ -374,7 +375,9 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
         $narrowestVictory = null;
 
         foreach ($blowouts as $matchupId => $teams) {
-            if (count($teams) !== 2) continue;
+            if (count($teams) !== 2) {
+                continue;
+            }
 
             $scores = array_values($teams);
             $rosters = array_keys($teams);
@@ -393,7 +396,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
                 $biggestBlowout = [
                     'winner' => $winnerRoster,
                     'loser' => $loserRoster,
-                    'margin' => $marginPercent
+                    'margin' => $marginPercent,
                 ];
             }
 
@@ -403,7 +406,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
                 $narrowestVictory = [
                     'winner' => $winnerRoster,
                     'loser' => $loserRoster,
-                    'margin' => $marginPercent
+                    'margin' => $marginPercent,
                 ];
             }
         }
@@ -449,11 +452,11 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
                 $points = $startersPoints[$index] ?? 0;
                 $position = $this->getPlayerPosition($playerId); // Would need player data
 
-                if (!isset($positionBest[$position]) || $points > $positionBest[$position]['points']) {
+                if (! isset($positionBest[$position]) || $points > $positionBest[$position]['points']) {
                     $positionBest[$position] = [
                         'player_id' => $playerId,
                         'points' => $points,
-                        'roster_id' => $rosterId
+                        'roster_id' => $rosterId,
                     ];
                 }
             }
@@ -496,15 +499,15 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
                 $projectionPerformances[$rosterId] = [
                     'actual' => $actualPoints,
                     'projected' => $projectedPoints,
-                    'percent' => $performancePercent
+                    'percent' => $performancePercent,
                 ];
             }
         }
 
-        if (!empty($projectionPerformances)) {
+        if (! empty($projectionPerformances)) {
             // Find best overachiever
             $bestOverachiever = collect($projectionPerformances)
-                ->filter(fn($perf) => $perf['percent'] > 0)
+                ->filter(fn ($perf) => $perf['percent'] > 0)
                 ->sortByDesc('percent')
                 ->first();
 
@@ -524,7 +527,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
 
             // Find worst underachiever
             $worstUnderachiever = collect($projectionPerformances)
-                ->filter(fn($perf) => $perf['percent'] < 0)
+                ->filter(fn ($perf) => $perf['percent'] < 0)
                 ->sortBy('percent')
                 ->first();
 
@@ -555,7 +558,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
             $rosterId = $matchup->roster_id;
             $starters = $matchup->starters ?? [];
             $players = $matchup->players ?? [];
-            $playersPoints = $matchup->players_points ?? (object)[];
+            $playersPoints = $matchup->players_points ?? (object) [];
 
             // Find bench players (players not in starters)
             $benchPlayers = array_diff($players, $starters);
@@ -564,11 +567,11 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
                 $points = $playersPoints->{$playerId} ?? 0;
                 $position = $this->getPlayerPosition($playerId);
 
-                if (!isset($benchBest[$position]) || $points > $benchBest[$position]['points']) {
+                if (! isset($benchBest[$position]) || $points > $benchBest[$position]['points']) {
                     $benchBest[$position] = [
                         'player_id' => $playerId,
                         'points' => $points,
-                        'roster_id' => $rosterId
+                        'roster_id' => $rosterId,
                     ];
                 }
             }
@@ -650,7 +653,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
             $position = is_object($player) ? ($player->position ?? 'Unknown') : ($player['position'] ?? 'Unknown');
 
             // Map position variations to standard positions
-            return match($position) {
+            return match ($position) {
                 'QB' => 'QB',
                 'RB' => 'RB',
                 'WR' => 'WR',
@@ -670,10 +673,10 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
         // Handle team defenses
         if (strlen($playerId) <= 4 && ctype_alpha($playerId)) {
             return [
-                'name' => strtoupper($playerId) . ' DEF',
+                'name' => strtoupper($playerId).' DEF',
                 'position' => 'DEF',
                 'team' => strtoupper($playerId),
-                'avatar' => null
+                'avatar' => null,
             ];
         }
 
@@ -688,15 +691,15 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
 
             // Use Sleeper's actual avatar pattern
             $avatarUrl = null;
-            if (!empty($playerId) && is_numeric($playerId)) {
+            if (! empty($playerId) && is_numeric($playerId)) {
                 $avatarUrl = "https://sleepercdn.com/content/nfl/players/thumb/{$playerId}.jpg";
             }
 
             return [
-                'name' => trim($firstName . ' ' . $lastName) ?: 'Unknown Player',
+                'name' => trim($firstName.' '.$lastName) ?: 'Unknown Player',
                 'position' => $position,
                 'team' => $team,
-                'avatar' => $avatarUrl
+                'avatar' => $avatarUrl,
             ];
         }
 
@@ -704,7 +707,7 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
             'name' => 'Unknown Player',
             'position' => 'RB',
             'team' => '',
-            'avatar' => null
+            'avatar' => null,
         ];
     }
 }

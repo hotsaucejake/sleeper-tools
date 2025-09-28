@@ -1,12 +1,6 @@
 <?php
 
-use App\DataTransferObjects\Analysis\Award;
-use App\DataTransferObjects\Analysis\PerformanceAwardsResults;
-use App\Services\Analysis\PerformanceAwardsService;
-use App\ValueObjects\LeagueId;
-use App\ValueObjects\Week;
 use Illuminate\Support\Facades\Cache;
-use HOTSAUCEJAKE\LaravelSleeper\Facades\LaravelSleeper;
 
 beforeEach(function () {
     Cache::flush();

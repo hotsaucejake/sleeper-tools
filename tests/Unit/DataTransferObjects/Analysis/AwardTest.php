@@ -103,7 +103,7 @@ it('stores complete player information correctly', function () {
         'position' => 'RB',
         'team' => 'SF',
         'points' => 28.7,
-        'avatar' => 'https://sleepercdn.com/content/nfl/players/thumb/4035.jpg'
+        'avatar' => 'https://sleepercdn.com/content/nfl/players/thumb/4035.jpg',
     ];
 
     $award = new Award(

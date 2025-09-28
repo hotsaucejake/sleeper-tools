@@ -1,13 +1,8 @@
 <?php
 
-use App\DataTransferObjects\Analysis\Award;
 use App\DataTransferObjects\Analysis\PerformanceAwardsResults;
 use App\Services\Analysis\PerformanceAwardsService;
 use App\Services\Sleeper\LeagueDataService;
-use App\ValueObjects\LeagueId;
-use App\ValueObjects\Week;
-use Illuminate\Support\Facades\Cache;
-use HOTSAUCEJAKE\LaravelSleeper\Facades\LaravelSleeper;
 
 it('implements performance awards interface', function () {
     $mockLeagueDataService = Mockery::mock(LeagueDataService::class);

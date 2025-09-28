@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use HOTSAUCEJAKE\LaravelSleeper\Facades\LaravelSleeper;
+use Illuminate\Console\Command;
 
 class CacheSleeperPlayers extends Command
 {
@@ -32,8 +32,9 @@ class CacheSleeperPlayers extends Command
             $this->info('Cleared existing cache.');
         }
 
-        if (cache()->has($cacheKey) && !$force) {
+        if (cache()->has($cacheKey) && ! $force) {
             $this->info('Player data already cached. Use --force to refresh.');
+
             return self::SUCCESS;
         }
 
@@ -42,6 +43,7 @@ class CacheSleeperPlayers extends Command
 
             $playerData = cache()->remember($cacheKey, now()->addDays(7), function () {
                 $this->info('Fetching player data from Sleeper API...');
+
                 return LaravelSleeper::getAllPlayers('nfl');
             });
 
@@ -51,12 +53,13 @@ class CacheSleeperPlayers extends Command
             $playerCount = is_object($playerData) ? count(get_object_vars($playerData)) : count($playerData);
 
             $this->info("✅ Successfully cached {$playerCount} players in {$executionTime}ms");
-            $this->info("Cache expires: " . now()->addDays(7)->format('Y-m-d H:i:s'));
+            $this->info('Cache expires: '.now()->addDays(7)->format('Y-m-d H:i:s'));
 
             return self::SUCCESS;
 
         } catch (\Exception $e) {
-            $this->error('❌ Failed to cache player data: ' . $e->getMessage());
+            $this->error('❌ Failed to cache player data: '.$e->getMessage());
+
             return self::FAILURE;
         }
     }
