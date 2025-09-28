@@ -4,122 +4,95 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Laravel 12 application that provides tools for analyzing Sleeper fantasy football leagues. The primary feature is "Shoulda Coulda Woulda" - a strength of schedule analyzer that shows how teams would perform against different opponents.
+Laravel 12 application providing fantasy football analytics tools for Sleeper leagues. Currently features "Shoulda Coulda Woulda" analysis with plans for comprehensive statistical toolkit expansion.
+
+## Architecture (Service-Oriented Design)
+
+**Service Layer Pattern**: Refactored from monolithic controller to service-based architecture
+- **Controllers**: Handle HTTP requests/responses only
+- **Services**: Business logic orchestration
+- **Value Objects**: Type-safe data containers (LeagueId, Week, RosterId, Score)
+- **DTOs**: Structured data transfer between layers
+- **Interfaces**: Service contracts for testability
+
+### Core Services
+- `ShouldaCouldaWouldaService`: Main analysis orchestration
+- `LeagueDataService`: Sleeper API data fetching/validation
+- `ScheduleAnalysisService`: Matchup processing and schedule building
+- `AlternativeRecordsService`: Core "what-if" calculation engine
+- `StrengthOfScheduleService`: Opponent difficulty analysis
 
 ## Key Dependencies
 
-- **Laravel Framework**: v12.31+ (PHP 8.2+)
-- **hotsaucejake/laravel-sleeper**: v1.0+ - Custom package for Sleeper API integration
-- **Laravel Sanctum**: API authentication
-- **Laravel UI**: Basic authentication scaffolding
+- **Laravel**: v12.31+ (PHP 8.2+)
+- **Pest PHP**: Testing framework with Mockery for mocking
+- **hotsaucejake/laravel-sleeper**: v1.0+ - Sleeper API wrapper
 - **Bootstrap 5**: Frontend framework
-- **Vite**: Asset bundling
 
 ## Development Commands
 
-### Basic Laravel Commands
 ```bash
-# Start development server
-php artisan serve
-
-# Full development environment (server + queue + logs + vite)
+# Development server + queue + logs + vite
 composer run dev
 
-# Run tests
+# Run tests (use Pest commands)
 php artisan test
-# or
-vendor/bin/phpunit
 
 # Code formatting
 vendor/bin/pint
 
-# Queue processing
-php artisan queue:work
-
-# View logs in real-time
-php artisan pail
+# Asset builds
+npm run dev        # Development with hot reload
+npm run build      # Production build
 ```
 
-### Asset Management
-```bash
-# Development build with hot reload
-npm run dev
+## Testing Strategy
 
-# Production build
-npm run build
-```
+**Framework**: Pest PHP with comprehensive coverage
+- **Unit Tests**: Service layer logic, value objects, DTOs
+- **Feature Tests**: Controller integration and end-to-end workflows
+- **Mocking**: Sleeper API responses for consistent testing
 
-### Database
-```bash
-# Run migrations
-php artisan migrate
+**Important**: Always run tests after changes - service layer has complex dependencies
 
-# Seed database
-php artisan db:seed
+## API Integration (Laravel Sleeper Package)
 
-# Reset and reseed
-php artisan migrate:fresh --seed
-```
+Primary facade: `HOTSAUCEJAKE\LaravelSleeper\Facades\LaravelSleeper`
 
-## Application Architecture
+**Key Methods**:
+- `getLeague($league_id)` - League settings/metadata
+- `getLeagueUsers($league_id)` - User profiles and rosters
+- `getLeagueMatchups($league_id, $week)` - Weekly scoring data
+- `getSportState()` - Current NFL week/season state
+- `showAvatar($avatar_id)` - Avatar URL generation
 
-### Core Components
+**Rate Limit**: Stay under 1000 calls/minute
 
-1. **Sleeper API Integration**: Uses the `hotsaucejake/laravel-sleeper` package to fetch league data, user information, matchups, and calculate alternative standings.
+## Current Features
 
-2. **Single Page Application**: The main feature is implemented as a single controller (`SelectLeagueController`) that handles league analysis.
+### Shoulda Coulda Woulda Analysis
+- Alternative win/loss records if teams played different schedules
+- Head-to-head performance matrix
+- Strength of schedule rankings
+- "Luck vs skill" separation analysis
 
-3. **Frontend**: Bootstrap 5-based UI with Blade templates. Primary view is `shoulda-coulda-woulda/league-select.blade.php`.
+**Algorithm**: For each team, calculates how they would perform against every other team's actual schedule, revealing scheduling advantages/disadvantages.
 
-### Key Files
+## Planned Expansion (TODO.md)
 
-- `app/Http/Controllers/ShouldaCouldaWoulda/SelectLeagueController.php` - Main logic for fetching and analyzing league data
-- `resources/views/shoulda-coulda-woulda/league-select.blade.php` - Primary UI for league analysis
-- `resources/views/layouts/shoulda-coulda-woulda.blade.php` - Layout template
-- `routes/web.php` - Route definitions
-
-### Data Flow
-
-1. User enters Sleeper League ID
-2. Controller fetches league data via LaravelSleeper facade
-3. Processes matchup data to calculate alternative records
-4. Renders visualization showing strength of schedule and head-to-head records
-
-### Laravel Sleeper Package Usage
-
-The application heavily relies on the `HOTSAUCEJAKE\LaravelSleeper\Facades\LaravelSleeper` facade for:
-- `getLeague($league_id)` - Fetch league settings
-- `getLeagueUsers($league_id)` - Get league participants
-- `getLeagueRosters($league_id)` - Get team rosters and records
-- `getLeagueMatchups($league_id, $week)` - Get weekly matchup results
-- `getSportState()` - Get current NFL week information
-- `showAvatar($avatar_id)` - Generate avatar URLs
+50+ analytics tools planned across categories:
+- Performance dashboards, draft analysis, trade intelligence
+- Manager behavioral patterns, luck vs skill metrics
+- Multi-season career tracking, predictive modeling
+- Achievement systems, competitive intelligence
 
 ## Environment Setup
 
-1. Copy `.env.example` to `.env`
-2. Set `APP_KEY` with `php artisan key:generate`
-3. Configure database connection in `.env`
-4. Run `composer install` and `npm install`
-5. Run migrations: `php artisan migrate`
-
-## Docker Support
-
-The project includes Docker configuration via Laravel Sail:
 ```bash
-# Start containers
-./sail up -d
-
-# Run artisan commands
-./sail artisan migrate
-
-# Run npm commands
-./sail npm run dev
+cp .env.example .env
+php artisan key:generate
+composer install && npm install
+php artisan migrate
 ```
 
-## Testing
-
-- Uses PHPUnit for testing
-- Test configuration in `phpunit.xml`
-- Test files in `tests/` directory (Unit and Feature)
-- Uses in-memory SQLite for testing (`DB_DATABASE=testing`)
+**Docker**: Use `./sail` prefix for all commands when using Laravel Sail

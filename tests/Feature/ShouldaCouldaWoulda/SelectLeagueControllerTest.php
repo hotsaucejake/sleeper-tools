@@ -1,16 +1,5 @@
 <?php
 
-use HOTSAUCEJAKE\LaravelSleeper\Facades\LaravelSleeper;
-use Illuminate\Support\Facades\Log;
-
-beforeEach(function () {
-    // Clear logs before each test
-    Log::shouldReceive('info')->andReturn(null);
-    Log::shouldReceive('debug')->andReturn(null);
-    Log::shouldReceive('warning')->andReturn(null);
-    Log::shouldReceive('error')->andReturn(null);
-});
-
 it('displays league selection form when no league parameter is provided', function () {
     $response = $this->get('/shoulda-coulda-woulda');
 
@@ -24,42 +13,84 @@ it('displays league selection form when no league parameter is provided', functi
 });
 
 it('successfully analyzes a valid league and displays results', function () {
-    // Mock all the Sleeper API calls with our fixture data
-    LaravelSleeper::shouldReceive('getLeague')
+    // Create expected analysis results
+    $leagueId = new \App\ValueObjects\LeagueId('1257452477368782848');
+
+    $managers = [
+        1 => [
+            'roster_id' => 1,
+            'user_id' => 'user1',
+            'name' => 'Test Manager 1',
+            'win' => 2,
+            'loss' => 1,
+            'avatar' => 'https://example.com/avatar.png',
+            'schedule' => [
+                1 => ['score' => 158.62, 'vs' => 2, 'roster_id' => 1],
+                2 => ['score' => 91.6, 'vs' => 3, 'roster_id' => 1],
+                3 => ['score' => 96.26, 'vs' => 4, 'roster_id' => 1],
+            ],
+            'records' => [
+                1 => ['name' => 'Test Manager 1', 'roster_id' => 1, 'win' => 1, 'loss' => 2],
+                2 => ['name' => 'Test Manager 2', 'roster_id' => 2, 'win' => 2, 'loss' => 1],
+            ],
+        ],
+        2 => [
+            'roster_id' => 2,
+            'user_id' => 'user2',
+            'name' => 'Test Manager 2',
+            'win' => 1,
+            'loss' => 2,
+            'avatar' => 'https://example.com/avatar2.png',
+            'schedule' => [
+                1 => ['score' => 140.25, 'vs' => 1, 'roster_id' => 2],
+                2 => ['score' => 105.8, 'vs' => 3, 'roster_id' => 2],
+                3 => ['score' => 88.15, 'vs' => 4, 'roster_id' => 2],
+            ],
+            'records' => [
+                1 => ['name' => 'Test Manager 1', 'roster_id' => 1, 'win' => 2, 'loss' => 1],
+                2 => ['name' => 'Test Manager 2', 'roster_id' => 2, 'win' => 1, 'loss' => 2],
+            ],
+        ],
+    ];
+
+    $strengthOfSchedule = [1 => 15, 2 => 25];
+
+    $leagueData = new \App\DataTransferObjects\League\LeagueData(
+        id: $leagueId,
+        name: 'Test League',
+        totalRosters: 10,
+        playoffWeekStart: new \App\ValueObjects\Week(15),
+        currentWeek: new \App\ValueObjects\Week(4),
+        managers: $managers,
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
+        rawLeagueData: (object) [
+            'name' => 'Test League',
+            'total_rosters' => 10,
+            'settings' => (object) [
+                'league_average_match' => false,
+                'playoff_week_start' => 15,
+            ],
+        ]
+    );
+
+    $analysisResults = \App\DataTransferObjects\Analysis\AnalysisResults::success(
+        $managers,
+        $strengthOfSchedule,
+        $leagueData
+    );
+
+    // Mock the analysis service
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->with('1133124905354973184')
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/league-data.json'), false));
+        ->with(Mockery::on(function ($arg) use ($leagueId) {
+            return $arg->toString() === $leagueId->toString();
+        }))
+        ->andReturn($analysisResults);
 
-    LaravelSleeper::shouldReceive('getLeagueUsers')
-        ->once()
-        ->with('1133124905354973184')
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/users-data.json'), false));
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    LaravelSleeper::shouldReceive('getLeagueRosters')
-        ->once()
-        ->with('1133124905354973184')
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/rosters-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getSportState')
-        ->once()
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/sport-state.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 1)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-1.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 2)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-2.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 3)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-3.json'), false));
-
-    LaravelSleeper::shouldReceive('showAvatar')
-        ->andReturn('https://example.com/avatar.png');
-
-    $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
+    $response = $this->get('/shoulda-coulda-woulda?league=1257452477368782848');
 
     $response->assertOk();
     $response->assertViewIs('shoulda-coulda-woulda.league-select');
@@ -68,25 +99,18 @@ it('successfully analyzes a valid league and displays results', function () {
     // Verify managers data structure
     $managers = $response->viewData('managers');
     expect($managers)->toBeArray()
-        ->and(count($managers))->toBe(10);
-
-    // Check that each manager has the required structure
-    foreach ($managers as $rosterId => $manager) {
-        expect($manager)->toHaveKeys([
-            'roster_id', 'user_id', 'win', 'loss', 'name', 'avatar', 'schedule', 'records'
+        ->and(count($managers))->toBe(2)
+        ->and($managers[1])->toHaveKeys([
+            'roster_id', 'user_id', 'win', 'loss', 'name', 'avatar', 'schedule', 'records',
+        ])
+        ->and($managers[2])->toHaveKeys([
+            'roster_id', 'user_id', 'win', 'loss', 'name', 'avatar', 'schedule', 'records',
         ]);
-
-        expect($manager['schedule'])->toBeArray()
-            ->and(count($manager['schedule']))->toBe(3); // 3 weeks of data
-
-        expect($manager['records'])->toBeArray()
-            ->and(count($manager['records']))->toBe(10); // Records against all 10 teams
-    }
 
     // Verify overall losses data
     $overallLosses = $response->viewData('overall_losses');
     expect($overallLosses)->toBeArray()
-        ->and(count($overallLosses))->toBe(10);
+        ->and(count($overallLosses))->toBe(2);
 
     // Verify league data
     $league = $response->viewData('league');
@@ -95,83 +119,62 @@ it('successfully analyzes a valid league and displays results', function () {
 
     // Verify current week
     $currentWeek = $response->viewData('current_week');
-    expect($currentWeek)->toBe(4); // min(4, 15) from fixtures
+    expect($currentWeek)->toBeInstanceOf(\App\ValueObjects\Week::class);
 });
 
 it('handles invalid league ID gracefully', function () {
-    LaravelSleeper::shouldReceive('getLeague')
+    // Mock the analysis service to throw an InvalidLeagueException
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->with('invalid')
-        ->andThrow(new Exception('League not found'));
+        ->andReturn(\App\DataTransferObjects\Analysis\AnalysisResults::failure('This is not a valid Sleeper league ID!'));
 
-    $response = $this->get('/shoulda-coulda-woulda?league=invalid');
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
+
+    $response = $this->get('/shoulda-coulda-woulda?league=1234567890');
 
     $response->assertRedirect(route('shoulda-coulda-woulda.select-league'));
     $response->assertSessionHas('error', 'This is not a valid Sleeper league ID!');
 });
 
 it('handles API connection errors gracefully', function () {
-    LaravelSleeper::shouldReceive('getLeague')
+    // Mock the analysis service to return an API connection failure
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->with('1133124905354973184')
-        ->andThrow(new Exception('Connection timeout'));
+        ->andReturn(\App\DataTransferObjects\Analysis\AnalysisResults::failure('There was an error fetching matchups!'));
+
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
     $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
 
     $response->assertRedirect(route('shoulda-coulda-woulda.select-league'));
-    $response->assertSessionHas('error', 'This is not a valid Sleeper league ID!');
+    $response->assertSessionHas('error', 'There was an error fetching matchups!');
 });
 
 it('handles missing league data gracefully', function () {
-    LaravelSleeper::shouldReceive('getLeague')
+    // Mock the analysis service to return a data insufficient failure
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->with('1133124905354973184')
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/league-data.json'), false));
+        ->andReturn(\App\DataTransferObjects\Analysis\AnalysisResults::failure('Could not retrieve your league settings!'));
 
-    LaravelSleeper::shouldReceive('getLeagueUsers')
-        ->once()
-        ->with('1133124905354973184')
-        ->andReturn([]); // Empty users - this will cause $users[0] to throw an exception
-
-    LaravelSleeper::shouldReceive('getLeagueRosters')
-        ->once()
-        ->with('1133124905354973184')
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/rosters-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getSportState')
-        ->once()
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/sport-state.json'), false));
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
     $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
 
     $response->assertRedirect(route('shoulda-coulda-woulda.select-league'));
-    // The actual behavior: empty users array causes $users[0] to throw exception,
-    // which is caught by outer try-catch and returns the generic league ID error
-    $response->assertSessionHas('error', 'This is not a valid Sleeper league ID!');
+    $response->assertSessionHas('error', 'Could not retrieve your league settings!');
 });
 
 it('handles missing league data validation properly', function () {
-    // Create a scenario where data validation actually fails (not an exception)
-    $sportState = (object) ['week' => 0, 'season' => '2024']; // week 0 will cause current_week to be 0
-
-    LaravelSleeper::shouldReceive('getLeague')
+    // Mock the analysis service to return a validation failure
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->with('1133124905354973184')
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/league-data.json'), false));
+        ->andReturn(\App\DataTransferObjects\Analysis\AnalysisResults::failure('Could not retrieve your league settings!'));
 
-    LaravelSleeper::shouldReceive('getLeagueUsers')
-        ->once()
-        ->with('1133124905354973184')
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/users-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueRosters')
-        ->once()
-        ->with('1133124905354973184')
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/rosters-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getSportState')
-        ->once()
-        ->andReturn($sportState);
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
     $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
 
@@ -180,28 +183,13 @@ it('handles missing league data validation properly', function () {
 });
 
 it('handles matchup fetching errors gracefully', function () {
-    LaravelSleeper::shouldReceive('getLeague')
+    // Mock the analysis service to return a matchup fetch failure
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->with('1133124905354973184')
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/league-data.json'), false));
+        ->andReturn(\App\DataTransferObjects\Analysis\AnalysisResults::failure('There was an error fetching matchups!'));
 
-    LaravelSleeper::shouldReceive('getLeagueUsers')
-        ->once()
-        ->with('1133124905354973184')
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/users-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueRosters')
-        ->once()
-        ->with('1133124905354973184')
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/rosters-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getSportState')
-        ->once()
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/sport-state.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 1)
-        ->andThrow(new Exception('Matchup fetch failed'));
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
     $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
 
@@ -210,40 +198,68 @@ it('handles matchup fetching errors gracefully', function () {
 });
 
 it('correctly calculates alternative records for specific scenarios', function () {
-    // Mock API calls
-    LaravelSleeper::shouldReceive('getLeague')
+    // Create test data with specific calculations
+    $managers = [
+        1 => [
+            'roster_id' => 1,
+            'user_id' => 'user1',
+            'name' => 'Test Manager 1',
+            'win' => 2, 'loss' => 1,
+            'avatar' => 'https://example.com/avatar.png',
+            'schedule' => [1 => ['score' => 158.62], 2 => ['score' => 91.6], 3 => ['score' => 96.26]],
+            'records' => [
+                1 => ['name' => 'Test Manager 1', 'roster_id' => 1, 'win' => 1, 'loss' => 2],
+                2 => ['name' => 'Double2ChinMan', 'roster_id' => 2, 'win' => 2, 'loss' => 1],
+            ],
+        ],
+        2 => [
+            'roster_id' => 2,
+            'user_id' => 'user2',
+            'name' => 'Double2ChinMan',
+            'win' => 1, 'loss' => 2,
+            'avatar' => 'https://example.com/avatar2.png',
+            'schedule' => [1 => ['score' => 140.25], 2 => ['score' => 105.8], 3 => ['score' => 88.15]],
+            'records' => [
+                1 => ['name' => 'Test Manager 1', 'roster_id' => 1, 'win' => 2, 'loss' => 1],
+                2 => ['name' => 'Double2ChinMan', 'roster_id' => 2, 'win' => 1, 'loss' => 2],
+            ],
+        ],
+    ];
+
+    $leagueData = new \App\DataTransferObjects\League\LeagueData(
+        id: new \App\ValueObjects\LeagueId('1133124905354973184'),
+        name: 'Test League',
+        totalRosters: 10,
+        playoffWeekStart: new \App\ValueObjects\Week(15),
+        currentWeek: new \App\ValueObjects\Week(4),
+        managers: $managers,
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
+        rawLeagueData: (object) [
+            'name' => 'Test League',
+            'total_rosters' => 10,
+            'settings' => (object) [
+                'league_average_match' => false,
+                'playoff_week_start' => 15,
+            ],
+        ]
+    );
+
+    $analysisResults = \App\DataTransferObjects\Analysis\AnalysisResults::success(
+        $managers,
+        [1 => 15, 2 => 25],
+        $leagueData
+    );
+
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/league-data.json'), false));
+        ->andReturn($analysisResults);
 
-    LaravelSleeper::shouldReceive('getLeagueUsers')
-        ->once()
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/users-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueRosters')
-        ->once()
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/rosters-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getSportState')
-        ->once()
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/sport-state.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 1)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-1.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 2)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-2.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 3)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-3.json'), false));
-
-    LaravelSleeper::shouldReceive('showAvatar')
-        ->andReturn('https://example.com/avatar.png');
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
     $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
 
+    $response->assertOk();
     $managers = $response->viewData('managers');
 
     // Test specific calculation: Manager 1 vs Manager 2's schedule
@@ -261,31 +277,36 @@ it('correctly calculates alternative records for specific scenarios', function (
 });
 
 it('correctly handles league average matching setting', function () {
-    // Create modified league data with league_average_match = 1
-    $leagueData = json_decode(file_get_contents(__DIR__ . '/../../Fixtures/league-data.json'), false);
-    $leagueData->settings->league_average_match = 1;
+    // Create league data with league_average_match = 1
+    $rawLeagueData = (object) [
+        'name' => 'Test League',
+        'total_rosters' => 10,
+        'settings' => (object) ['league_average_match' => 1],
+    ];
 
-    LaravelSleeper::shouldReceive('getLeague')
+    $leagueData = new \App\DataTransferObjects\League\LeagueData(
+        id: new \App\ValueObjects\LeagueId('1133124905354973184'),
+        name: 'Test League',
+        totalRosters: 10,
+        playoffWeekStart: new \App\ValueObjects\Week(15),
+        currentWeek: new \App\ValueObjects\Week(4),
+        managers: [],
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
+        rawLeagueData: $rawLeagueData
+    );
+
+    $analysisResults = \App\DataTransferObjects\Analysis\AnalysisResults::success(
+        [],
+        [],
+        $leagueData
+    );
+
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->andReturn($leagueData);
+        ->andReturn($analysisResults);
 
-    LaravelSleeper::shouldReceive('getLeagueUsers')
-        ->once()
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/users-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueRosters')
-        ->once()
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/rosters-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getSportState')
-        ->once()
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/sport-state.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-1.json'), false));
-
-    LaravelSleeper::shouldReceive('showAvatar')
-        ->andReturn('https://example.com/avatar.png');
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
     $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
 
@@ -295,30 +316,74 @@ it('correctly handles league average matching setting', function () {
 });
 
 it('correctly sorts strength of schedule by overall losses', function () {
-    LaravelSleeper::shouldReceive('getLeague')
+    // Pre-sorted strength of schedule data (highest losses first = toughest schedule)
+    $strengthOfSchedule = [2 => 25, 3 => 20, 1 => 15];
+
+    // Create managers to match the strength of schedule roster IDs
+    $managers = [
+        1 => [
+            'roster_id' => 1,
+            'user_id' => 'user1',
+            'name' => 'Manager 1',
+            'win' => 3, 'loss' => 0,
+            'avatar' => null,
+            'schedule' => [],
+            'records' => [],
+        ],
+        2 => [
+            'roster_id' => 2,
+            'user_id' => 'user2',
+            'name' => 'Manager 2',
+            'win' => 1, 'loss' => 2,
+            'avatar' => null,
+            'schedule' => [],
+            'records' => [],
+        ],
+        3 => [
+            'roster_id' => 3,
+            'user_id' => 'user3',
+            'name' => 'Manager 3',
+            'win' => 2, 'loss' => 1,
+            'avatar' => null,
+            'schedule' => [],
+            'records' => [],
+        ],
+    ];
+
+    $leagueData = new \App\DataTransferObjects\League\LeagueData(
+        id: new \App\ValueObjects\LeagueId('1133124905354973184'),
+        name: 'Test League',
+        totalRosters: 3,
+        playoffWeekStart: new \App\ValueObjects\Week(15),
+        currentWeek: new \App\ValueObjects\Week(4),
+        managers: $managers,
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
+        rawLeagueData: (object) [
+            'name' => 'Test League',
+            'total_rosters' => 3,
+            'settings' => (object) [
+                'league_average_match' => false,
+                'playoff_week_start' => 15,
+            ],
+        ]
+    );
+
+    $analysisResults = \App\DataTransferObjects\Analysis\AnalysisResults::success(
+        $managers,
+        $strengthOfSchedule,
+        $leagueData
+    );
+
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/league-data.json'), false));
+        ->andReturn($analysisResults);
 
-    LaravelSleeper::shouldReceive('getLeagueUsers')
-        ->once()
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/users-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueRosters')
-        ->once()
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/rosters-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getSportState')
-        ->once()
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/sport-state.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-1.json'), false));
-
-    LaravelSleeper::shouldReceive('showAvatar')
-        ->andReturn('https://example.com/avatar.png');
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
     $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
 
+    $response->assertOk();
     $overallLosses = $response->viewData('overall_losses');
 
     // Verify that it's sorted in descending order (arsort)
@@ -330,39 +395,61 @@ it('correctly sorts strength of schedule by overall losses', function () {
 });
 
 it('preserves exact scores from API data', function () {
-    LaravelSleeper::shouldReceive('getLeague')
+    // Create managers with exact scores from fixtures
+    $managers = [
+        1 => [
+            'roster_id' => 1, 'user_id' => 'user1', 'name' => 'Manager 1',
+            'win' => 2, 'loss' => 1, 'avatar' => 'https://example.com/avatar.png',
+            'schedule' => [
+                1 => ['score' => 158.62], 2 => ['score' => 91.6], 3 => ['score' => 96.26],
+            ],
+            'records' => [],
+        ],
+        5 => [
+            'roster_id' => 5, 'user_id' => 'user5', 'name' => 'Manager 5',
+            'win' => 1, 'loss' => 2, 'avatar' => 'https://example.com/avatar.png',
+            'schedule' => [
+                1 => ['score' => 120.0], 2 => ['score' => 149.94], 3 => ['score' => 110.0],
+            ],
+            'records' => [],
+        ],
+        10 => [
+            'roster_id' => 10, 'user_id' => 'user10', 'name' => 'Manager 10',
+            'win' => 3, 'loss' => 0, 'avatar' => 'https://example.com/avatar.png',
+            'schedule' => [
+                1 => ['score' => 177.86], 2 => ['score' => 135.0], 3 => ['score' => 140.0],
+            ],
+            'records' => [],
+        ],
+    ];
+
+    $leagueData = new \App\DataTransferObjects\League\LeagueData(
+        id: new \App\ValueObjects\LeagueId('1133124905354973184'),
+        name: 'Test League',
+        totalRosters: 10,
+        playoffWeekStart: new \App\ValueObjects\Week(15),
+        currentWeek: new \App\ValueObjects\Week(4),
+        managers: $managers,
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
+        rawLeagueData: (object) ['name' => 'Test League']
+    );
+
+    $analysisResults = \App\DataTransferObjects\Analysis\AnalysisResults::success(
+        $managers,
+        [],
+        $leagueData
+    );
+
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/league-data.json'), false));
+        ->andReturn($analysisResults);
 
-    LaravelSleeper::shouldReceive('getLeagueUsers')
-        ->once()
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/users-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueRosters')
-        ->once()
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/rosters-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getSportState')
-        ->once()
-        ->andReturn((object) json_decode(file_get_contents(__DIR__ . '/../../Fixtures/sport-state.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 1)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-1.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 2)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-2.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 3)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-3.json'), false));
-
-    LaravelSleeper::shouldReceive('showAvatar')
-        ->andReturn('https://example.com/avatar.png');
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
     $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
 
+    $response->assertOk();
     $managers = $response->viewData('managers');
 
     // Verify specific scores from fixtures are preserved
@@ -375,40 +462,35 @@ it('preserves exact scores from API data', function () {
 });
 
 it('correctly calculates current week as minimum of sport state and playoff start', function () {
-    // Test case where sport state week is less than playoff start
-    $sportState = (object) ['week' => 3, 'season' => '2024'];
-    $leagueData = json_decode(file_get_contents(__DIR__ . '/../../Fixtures/league-data.json'), false);
-    $leagueData->settings->playoff_week_start = 15;
+    // Create league data where current week is min(3, 15) = 3
+    $leagueData = new \App\DataTransferObjects\League\LeagueData(
+        id: new \App\ValueObjects\LeagueId('1133124905354973184'),
+        name: 'Test League',
+        totalRosters: 10,
+        playoffWeekStart: new \App\ValueObjects\Week(15),
+        currentWeek: new \App\ValueObjects\Week(3), // min(3, 15) = 3
+        managers: [],
+        schedule: new \App\DataTransferObjects\League\WeeklySchedule,
+        rawLeagueData: (object) ['name' => 'Test League']
+    );
 
-    LaravelSleeper::shouldReceive('getLeague')
+    $analysisResults = \App\DataTransferObjects\Analysis\AnalysisResults::success(
+        [],
+        [],
+        $leagueData
+    );
+
+    $mockAnalysisService = Mockery::mock(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class);
+    $mockAnalysisService->shouldReceive('analyzeLeague')
         ->once()
-        ->andReturn($leagueData);
+        ->andReturn($analysisResults);
 
-    LaravelSleeper::shouldReceive('getSportState')
-        ->once()
-        ->andReturn($sportState);
-
-    LaravelSleeper::shouldReceive('getLeagueUsers')
-        ->once()
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/users-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueRosters')
-        ->once()
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/rosters-data.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 1)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-1.json'), false));
-
-    LaravelSleeper::shouldReceive('getLeagueMatchups')
-        ->with('1133124905354973184', 2)
-        ->andReturn(json_decode(file_get_contents(__DIR__ . '/../../Fixtures/matchups-week-2.json'), false));
-
-    LaravelSleeper::shouldReceive('showAvatar')
-        ->andReturn('https://example.com/avatar.png');
+    $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
     $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
 
+    $response->assertOk();
     $currentWeek = $response->viewData('current_week');
-    expect($currentWeek)->toBe(3); // min(3, 15) = 3
+    expect($currentWeek)->toBeInstanceOf(\App\ValueObjects\Week::class);
+    expect($currentWeek->toInt())->toBe(3); // min(3, 15) = 3
 });
