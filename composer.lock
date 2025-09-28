@@ -1055,16 +1055,16 @@
         },
         {
             "name": "hotsaucejake/laravel-sleeper",
-            "version": "v1.3.0",
+            "version": "v1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hotsaucejake/laravel-sleeper.git",
-                "reference": "e7391679a80526534846bdcec6b5e8c0ed0b7a2f"
+                "reference": "111f2424aeb1d34a12c0c9e9adfc281e29f0bfd5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hotsaucejake/laravel-sleeper/zipball/e7391679a80526534846bdcec6b5e8c0ed0b7a2f",
-                "reference": "e7391679a80526534846bdcec6b5e8c0ed0b7a2f",
+                "url": "https://api.github.com/repos/hotsaucejake/laravel-sleeper/zipball/111f2424aeb1d34a12c0c9e9adfc281e29f0bfd5",
+                "reference": "111f2424aeb1d34a12c0c9e9adfc281e29f0bfd5",
                 "shasum": ""
             },
             "require": {
@@ -1119,9 +1119,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hotsaucejake/laravel-sleeper/issues",
-                "source": "https://github.com/hotsaucejake/laravel-sleeper/tree/v1.3.0"
+                "source": "https://github.com/hotsaucejake/laravel-sleeper/tree/v1.3.1"
             },
-            "time": "2025-09-27T23:44:55+00:00"
+            "time": "2025-09-28T12:12:50+00:00"
         },
         {
             "name": "laravel/framework",
