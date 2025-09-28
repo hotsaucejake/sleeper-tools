@@ -30,7 +30,7 @@
                         </div>
                         <div class="col-auto">
                             <select name="week" id="week" class="form-select" onchange="this.form.submit()">
-                                @for ($i = 1; $i <= ($current_week->toInt() ?? 18); $i++)
+                                @for ($i = 1; $i <= $max_week; $i++)
                                     <option value="{{ $i }}" {{ $week == $i ? 'selected' : '' }}>
                                         Week {{ $i }}
                                     </option>
@@ -118,6 +118,83 @@
                     </div>
                 </div>
             @endif
+
+            <!-- Award Tallies Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Award Tallies (Weeks 1-{{ $week }})</h5>
+                    <p class="card-text text-muted mb-0">Total awards earned by each manager through week {{ $week }}</p>
+                </div>
+                <div class="card-body">
+                    @if (!empty($award_tallies))
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Manager</th>
+                                        <th class="text-center">💰<br><small>Money Shot</small></th>
+                                        <th class="text-center">🍆<br><small>RJPA</small></th>
+                                        <th class="text-center">🌮<br><small>Taco</small></th>
+                                        <th class="text-center">🔥<br><small>Best Manager</small></th>
+                                        <th class="text-center">🤔<br><small>Worst Manager</small></th>
+                                        <th class="text-center">😂<br><small>Biggest Blowout</small></th>
+                                        <th class="text-center">😱<br><small>Narrow Victory</small></th>
+                                        <th class="text-center">🤓<br><small>Overachiever</small></th>
+                                        <th class="text-center">💀<br><small>Below Expectation</small></th>
+                                        <th class="text-center">⭐<br><small>Position Awards</small></th>
+                                        <th class="text-center">👀<br><small>Benchwarmer</small></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($award_tallies as $rosterId => $tally)
+                                        @php
+                                            $positionAwards = ($tally['awards']['QB of the Week'] ?? 0) +
+                                                            ($tally['awards']['RB of the Week'] ?? 0) +
+                                                            ($tally['awards']['WR of the Week'] ?? 0) +
+                                                            ($tally['awards']['TE of the Week'] ?? 0) +
+                                                            ($tally['awards']['K of the Week'] ?? 0) +
+                                                            ($tally['awards']['DEF of the Week'] ?? 0);
+
+                                            $benchwarmerAwards = ($tally['awards']['QB Benchwarmer of the Week'] ?? 0) +
+                                                               ($tally['awards']['RB Benchwarmer of the Week'] ?? 0) +
+                                                               ($tally['awards']['WR Benchwarmer of the Week'] ?? 0) +
+                                                               ($tally['awards']['TE Benchwarmer of the Week'] ?? 0);
+
+                                            $total = ($tally['awards']['The Money Shot'] ?? 0) +
+                                                   ($tally['awards']['The Taco'] ?? 0) +
+                                                   ($tally['awards']['Best Manager'] ?? 0) +
+                                                   ($tally['awards']['Worst Manager'] ?? 0) +
+                                                   ($tally['awards']['Biggest Blowout'] ?? 0) +
+                                                   ($tally['awards']['Narrow Victory'] ?? 0) +
+                                                   ($tally['awards']['Overachiever'] ?? 0) +
+                                                   ($tally['awards']['Below Expectation'] ?? 0) +
+                                                   $positionAwards +
+                                                   $benchwarmerAwards +
+                                                   ($tally['awards']['The Ron Jeremy Performance Award'] ?? 0);
+                                        @endphp
+                                        <tr>
+                                            <td class="fw-bold">{{ $tally['manager']['name'] }}</td>
+                                            <td class="text-center">{{ $tally['awards']['The Money Shot'] ?? 0 }}</td>
+                                            <td class="text-center">{{ $tally['awards']['The Ron Jeremy Performance Award'] ?? 0 }}</td>
+                                            <td class="text-center">{{ $tally['awards']['The Taco'] ?? 0 }}</td>
+                                            <td class="text-center">{{ $tally['awards']['Best Manager'] ?? 0 }}</td>
+                                            <td class="text-center">{{ $tally['awards']['Worst Manager'] ?? 0 }}</td>
+                                            <td class="text-center">{{ $tally['awards']['Biggest Blowout'] ?? 0 }}</td>
+                                            <td class="text-center">{{ $tally['awards']['Narrow Victory'] ?? 0 }}</td>
+                                            <td class="text-center">{{ $tally['awards']['Overachiever'] ?? 0 }}</td>
+                                            <td class="text-center">{{ $tally['awards']['Below Expectation'] ?? 0 }}</td>
+                                            <td class="text-center">{{ $positionAwards }}</td>
+                                            <td class="text-center">{{ $benchwarmerAwards }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="text-muted mb-0">No award data available.</p>
+                    @endif
+                </div>
+            </div>
 
             @include('partials.share-url', [
                 'title' => 'Share these awards!',

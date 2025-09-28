@@ -78,6 +78,86 @@ class PerformanceAwardsService implements PerformanceAwardsInterface
         return $managers;
     }
 
+    public function getLeagueData(LeagueId $leagueId)
+    {
+        return $this->leagueDataService->getCompleteLeagueData($leagueId);
+    }
+
+    public function calculateAwardTallies(LeagueId $leagueId, Week $throughWeek): array
+    {
+        // Load player data for position calculations
+        $this->loadPlayerData();
+
+        $tallies = [];
+        $awardTypes = [
+            'The Money Shot',
+            'The Taco',
+            'Best Manager',
+            'Worst Manager',
+            'Biggest Blowout',
+            'Narrow Victory',
+            'Overachiever',
+            'Below Expectation',
+            'QB of the Week',
+            'RB of the Week',
+            'WR of the Week',
+            'TE of the Week',
+            'K of the Week',
+            'DEF of the Week',
+            'QB Benchwarmer of the Week',
+            'RB Benchwarmer of the Week',
+            'WR Benchwarmer of the Week',
+            'TE Benchwarmer of the Week',
+            'The Ron Jeremy Performance Award'
+        ];
+
+        // Get league data once
+        $leagueData = $this->leagueDataService->getCompleteLeagueData($leagueId);
+        $managers = $this->buildManagersArray($leagueData->rawRosters, $leagueData->rawUsers);
+
+        // Initialize tallies for all managers and award types
+        foreach ($managers as $rosterId => $manager) {
+            $tallies[$rosterId] = [
+                'manager' => $manager,
+                'awards' => array_fill_keys($awardTypes, 0)
+            ];
+        }
+
+        // Calculate awards for each week from 1 to throughWeek
+        for ($weekNum = 1; $weekNum <= $throughWeek->toInt(); $weekNum++) {
+            try {
+                $matchups = LaravelSleeper::getLeagueMatchups($leagueId->toString(), $weekNum);
+                if (empty($matchups)) {
+                    continue; // Skip weeks with no data
+                }
+
+                $awards = $this->generateAwards($matchups, $managers, $leagueData);
+
+                // Tally awards for this week
+                foreach ($awards as $award) {
+                    $managerName = $award->managerName;
+                    $awardTitle = $award->title;
+
+                    // Find the roster ID for this manager
+                    foreach ($tallies as $rosterId => $tallyData) {
+                        if ($tallyData['manager']['name'] === $managerName) {
+                            if (isset($tallies[$rosterId]['awards'][$awardTitle])) {
+                                $tallies[$rosterId]['awards'][$awardTitle]++;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+            } catch (\Exception $e) {
+                // Continue if a specific week fails
+                continue;
+            }
+        }
+
+        return $tallies;
+    }
+
     private function loadPlayerData(): void
     {
         if ($this->playerData === null) {
