@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SelectLeagueController;
+use App\Http\Controllers\tools\PerformanceAwardsController;
 use App\Http\Controllers\tools\ShouldaCouldaWouldaController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,3 +25,6 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 // Shoulda Coulda Woulda analysis results
 Route::get('/shoulda-coulda-woulda', ShouldaCouldaWouldaController::class)->name('shoulda-coulda-woulda');
+
+// Performance Awards tool
+Route::get('/performance-awards', PerformanceAwardsController::class)->name('performance-awards');

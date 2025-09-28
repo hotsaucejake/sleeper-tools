@@ -46,6 +46,33 @@
                     </div>
                 </div>
 
+                <!-- Performance Awards Tool -->
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="text-primary me-3">
+                                    <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                    </svg>
+                                </div>
+                                <h5 class="card-title mb-0">Performance Awards</h5>
+                            </div>
+                            <p class="card-text">
+                                Weekly performance awards including best manager, biggest blowout, position leaders, and more fun categories.
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ route('performance-awards', ['league_id' => $league_id]) }}" class="btn btn-primary">
+                                View Awards
+                                <svg width="16" height="16" fill="currentColor" class="ms-1" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Placeholder for future tools -->
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 opacity-50">
