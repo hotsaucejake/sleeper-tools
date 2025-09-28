@@ -1,10 +1,10 @@
 <?php
 
 it('displays league selection form when no league parameter is provided', function () {
-    $response = $this->get('/shoulda-coulda-woulda');
+    $response = $this->get('/');
 
     $response->assertOk();
-    $response->assertViewIs('shoulda-coulda-woulda.league-select');
+    $response->assertViewIs('league-select');
     $response->assertViewHas('valid_league', false);
     $response->assertViewHas('managers', []);
     $response->assertViewHas('overall_losses', []);
@@ -12,7 +12,13 @@ it('displays league selection form when no league parameter is provided', functi
     $response->assertViewHas('current_week', null);
 });
 
-it('successfully analyzes a valid league and displays results', function () {
+it('redirects to dashboard when valid league is submitted', function () {
+    $response = $this->get('/?league=1257452477368782848');
+
+    $response->assertRedirect('/dashboard?league_id=1257452477368782848');
+});
+
+it('successfully displays analysis results on tools page', function () {
     // Create expected analysis results
     $leagueId = new \App\ValueObjects\LeagueId('1257452477368782848');
 
@@ -90,11 +96,10 @@ it('successfully analyzes a valid league and displays results', function () {
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1257452477368782848');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1257452477368782848');
 
     $response->assertOk();
-    $response->assertViewIs('shoulda-coulda-woulda.league-select');
-    $response->assertViewHas('valid_league', true);
+    $response->assertViewIs('tools.shoulda-coulda-woulda');
 
     // Verify managers data structure
     $managers = $response->viewData('managers');
@@ -131,9 +136,9 @@ it('handles invalid league ID gracefully', function () {
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1234567890');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1234567890');
 
-    $response->assertRedirect(route('shoulda-coulda-woulda.select-league'));
+    $response->assertRedirect('/dashboard?league_id=1234567890');
     $response->assertSessionHas('error', 'This is not a valid Sleeper league ID!');
 });
 
@@ -146,9 +151,9 @@ it('handles API connection errors gracefully', function () {
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1133124905354973184');
 
-    $response->assertRedirect(route('shoulda-coulda-woulda.select-league'));
+    $response->assertRedirect('/dashboard?league_id=1133124905354973184');
     $response->assertSessionHas('error', 'There was an error fetching matchups!');
 });
 
@@ -161,9 +166,9 @@ it('handles missing league data gracefully', function () {
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1133124905354973184');
 
-    $response->assertRedirect(route('shoulda-coulda-woulda.select-league'));
+    $response->assertRedirect('/dashboard?league_id=1133124905354973184');
     $response->assertSessionHas('error', 'Could not retrieve your league settings!');
 });
 
@@ -176,9 +181,9 @@ it('handles missing league data validation properly', function () {
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1133124905354973184');
 
-    $response->assertRedirect(route('shoulda-coulda-woulda.select-league'));
+    $response->assertRedirect('/dashboard?league_id=1133124905354973184');
     $response->assertSessionHas('error', 'Could not retrieve your league settings!');
 });
 
@@ -191,9 +196,9 @@ it('handles matchup fetching errors gracefully', function () {
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1133124905354973184');
 
-    $response->assertRedirect(route('shoulda-coulda-woulda.select-league'));
+    $response->assertRedirect('/dashboard?league_id=1133124905354973184');
     $response->assertSessionHas('error', 'There was an error fetching matchups!');
 });
 
@@ -257,7 +262,7 @@ it('correctly calculates alternative records for specific scenarios', function (
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1133124905354973184');
 
     $response->assertOk();
     $managers = $response->viewData('managers');
@@ -308,7 +313,7 @@ it('correctly handles league average matching setting', function () {
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1133124905354973184');
 
     $response->assertOk();
     $league = $response->viewData('league');
@@ -381,7 +386,7 @@ it('correctly sorts strength of schedule by overall losses', function () {
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1133124905354973184');
 
     $response->assertOk();
     $overallLosses = $response->viewData('overall_losses');
@@ -447,7 +452,7 @@ it('preserves exact scores from API data', function () {
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1133124905354973184');
 
     $response->assertOk();
     $managers = $response->viewData('managers');
@@ -487,7 +492,7 @@ it('correctly calculates current week as minimum of sport state and playoff star
 
     $this->app->instance(\App\Services\Analysis\Contracts\FantasyAnalysisInterface::class, $mockAnalysisService);
 
-    $response = $this->get('/shoulda-coulda-woulda?league=1133124905354973184');
+    $response = $this->get('/shoulda-coulda-woulda?league_id=1133124905354973184');
 
     $response->assertOk();
     $currentWeek = $response->viewData('current_week');
