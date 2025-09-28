@@ -1,66 +1,199 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sleeper Tools
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based toolkit for analyzing Sleeper fantasy football leagues with advanced statistics and insights.
 
-## About Laravel
+## Overview
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Sleeper Tools is a web application that provides comprehensive analysis tools for Sleeper fantasy football leagues. Built with Laravel 12 and modern PHP practices, it offers data-driven insights to help fantasy players understand their league dynamics, evaluate team performance, and make strategic decisions.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Current Tools
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Shoulda Coulda Woulda Analysis
 
-## Learning Laravel
+An advanced fantasy football analysis tool that calculates alternative win/loss records and strength of schedule metrics for your Sleeper league.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**What it does:**
+- Calculates how each team would perform if they played every other team's schedule
+- Analyzes head-to-head matchups between all teams
+- Ranks teams by strength of schedule (toughest to easiest opponents)
+- Identifies luck factors in current standings
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**Key Features:**
+- Interactive team cards showing actual vs. alternative records
+- Strength of schedule visualization with progress bars
+- Head-to-head breakdown for every team combination
+- Responsive design for desktop and mobile viewing
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+For detailed technical documentation, see [shoulda-coulda-woulda.md](./shoulda-coulda-woulda.md).
 
-## Laravel Sponsors
+## Planned Tools
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+This project is designed to expand with additional analysis tools based on league data and statistics:
 
-### Premium Partners
+- **Player Performance Analytics**: Deep dive into individual player consistency and upside
+- **Trade Analyzer**: Evaluate trade fairness and projected impact
+- **Waiver Wire Intelligence**: Advanced pickup recommendations based on schedule and trends
+- **Playoff Predictor**: Monte Carlo simulations for playoff scenarios
+- **Draft Analysis**: Post-draft evaluation and keeper league insights
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+## Technology Stack
+
+- **Framework**: Laravel 12
+- **PHP**: 8.2+
+- **Testing**: Pest PHP with Mockery
+- **Frontend**: Blade templates with Tailwind CSS
+- **API Integration**: Sleeper Fantasy API
+- **Architecture**: Service-oriented with dependency injection
+
+## Installation
+
+### Requirements
+
+- PHP 8.2 or higher
+- Composer
+- Node.js and npm
+- Docker (optional, for Laravel Sail)
+
+### Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/hotsaucejake/sleeper-tools.git
+cd sleeper-tools
+```
+
+2. Install PHP dependencies:
+```bash
+composer install
+```
+
+3. Install Node.js dependencies:
+```bash
+npm install
+```
+
+4. Copy environment file:
+```bash
+cp .env.example .env
+```
+
+5. Generate application key:
+```bash
+php artisan key:generate
+```
+
+6. Build assets:
+```bash
+npm run build
+```
+
+### Using Laravel Sail (Docker)
+
+If you prefer using Docker:
+
+```bash
+# Start the containers
+./vendor/bin/sail up -d
+
+# Install dependencies
+./vendor/bin/sail composer install
+./vendor/bin/sail npm install
+
+# Generate key and build assets
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail npm run build
+```
+
+## Usage
+
+### Shoulda Coulda Woulda Analysis
+
+1. Navigate to the application in your browser
+2. Enter your Sleeper League ID (found in your league URL)
+3. Click "Analyze League" to generate comprehensive statistics
+4. Explore team cards and strength of schedule rankings
+
+### Finding Your League ID
+
+Your Sleeper League ID is the numeric value in your league URL:
+- Example: `https://sleeper.app/leagues/123456789/matchups`
+- League ID: `123456789`
+
+## Testing
+
+The project uses Pest PHP for testing with comprehensive unit and feature test coverage.
+
+### Running Tests
+
+```bash
+# Run all tests
+php artisan test
+
+# Run with coverage
+php artisan test --coverage
+
+# Run specific test types
+php artisan test --group=unit
+php artisan test --group=feature
+
+# Using Sail
+./vendor/bin/sail artisan test
+```
+
+### Test Structure
+
+- **Unit Tests**: Service layer logic, value objects, and DTOs
+- **Feature Tests**: Controller integration and end-to-end workflows
+- **Mock Data**: Realistic Sleeper API responses for consistent testing
+
+## Architecture
+
+### Service Layer Design
+
+The application follows a service-oriented architecture with clear separation of concerns:
+
+- **Controllers**: Handle HTTP requests and responses
+- **Services**: Business logic and orchestration
+- **Value Objects**: Type-safe data containers (LeagueId, Week, etc.)
+- **DTOs**: Structured data transfer between layers
+- **Interfaces**: Contracts for external API integration
+
+### Key Services
+
+- `ShouldaCouldaWouldaService`: Main analysis orchestration
+- `LeagueDataService`: Sleeper API data fetching and validation
+- `ScheduleAnalysisService`: Matchup processing and schedule building
+- `AlternativeRecordsService`: Core "what-if" calculation engine
+- `StrengthOfScheduleService`: Opponent difficulty analysis
+
+## API Integration
+
+The application integrates with the Sleeper Fantasy API to fetch:
+- League settings and metadata
+- User profiles and roster information
+- Weekly matchup results and scores
+- Current NFL season state
+
+All API interactions are abstracted through service contracts for testability and maintainability.
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
 
-## Code of Conduct
+### Development Guidelines
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- Follow PSR-12 coding standards
+- Write tests for new features
+- Use type hints and return types
+- Document complex algorithms
+- Maintain service layer separation
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [MIT license](LICENSE).
+
+## Acknowledgments
+
+- [Sleeper](https://sleeper.app) for providing the fantasy football API
+- The Laravel community for excellent documentation and packages
+- Fantasy football enthusiasts who inspired these analytical tools
